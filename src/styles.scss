@@ -1,0 +1,76 @@
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
+/* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+// Status and visibility colour tokens (00 section 2). Each pair meets 4.5:1 contrast; meaning is also
+// carried by an icon and a text label, never by colour alone.
+:root {
+  --app-status-grey-bg: #e3e3e3;
+  --app-status-grey-fg: #1f1f1f;
+  --app-status-blue-bg: #d3e3fd;
+  --app-status-blue-fg: #0b3d91;
+  --app-status-amber-bg: #ffe8a3;
+  --app-status-amber-fg: #5c4300;
+  --app-status-purple-bg: #e9ddff;
+  --app-status-purple-fg: #3f1d8a;
+  --app-status-green-bg: #c8f0d0;
+  --app-status-green-fg: #0d4a1f;
+  --app-status-red-bg: #ffd9d6;
+  --app-status-red-fg: #7a0b0b;
+  --app-status-teal-bg: #c4f0ee;
+  --app-status-teal-fg: #05504c;
+  --app-status-dark-green-bg: #a8e0b5;
+  --app-status-dark-green-fg: #063d1a;
+}
+
+.cdk-visually-hidden-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

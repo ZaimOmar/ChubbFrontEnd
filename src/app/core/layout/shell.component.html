@@ -1,0 +1,56 @@
+<a class="skip-link" href="#main-content" (click)="skipToMain($event, main)"
+  >Skip to main content</a
+>
+<header>
+  <mat-toolbar>
+    @if (isNarrow()) {
+      <button
+        mat-icon-button
+        type="button"
+        aria-label="Open navigation menu"
+        [attr.aria-expanded]="drawer.opened"
+        (click)="drawer.toggle()"
+      >
+        <mat-icon aria-hidden="true">menu</mat-icon>
+      </button>
+    }
+    <span class="brand">Chubb Claims</span>
+    @if (areaLabel()) {
+      <span class="area">Area: {{ areaLabel() }}</span>
+    }
+    <span class="spacer"></span>
+    @if (userName()) {
+      <span class="user">{{ userName() }} ({{ roleText() }})</span>
+    }
+    <button mat-button type="button" (click)="logout.emit()">Logout</button>
+  </mat-toolbar>
+</header>
+<mat-sidenav-container class="container">
+  <mat-sidenav #drawer [mode]="isNarrow() ? 'over' : 'side'" [opened]="!isNarrow()">
+    <nav aria-label="Main">
+      @for (group of groups(); track group.heading) {
+        @if (showHeadings()) {
+          <h2 class="group-heading">{{ group.heading }}</h2>
+        }
+        <ul>
+          @for (item of group.items; track item.url) {
+            <li>
+              <a
+                [routerLink]="item.url"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page"
+                (click)="closeIfNarrow(drawer)"
+                >{{ item.label }}</a
+              >
+            </li>
+          }
+        </ul>
+      }
+    </nav>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <main id="main-content" #main tabindex="-1">
+      <ng-content />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

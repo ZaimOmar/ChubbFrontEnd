@@ -1,0 +1,14 @@
+.dev-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--mat-sys-outline);
+}
+
+h2 {
+  margin: 0 0 8px;
+  font: var(--mat-sys-title-small);
+}
+
+mat-form-field {
+  width: 100%;
+}

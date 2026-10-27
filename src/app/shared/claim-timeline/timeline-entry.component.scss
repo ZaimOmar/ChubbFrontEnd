@@ -1,0 +1,56 @@
+.entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+}
+
+time {
+  font: var(--mat-sys-label-large);
+}
+
+.summary {
+  font: var(--mat-sys-body-large);
+}
+
+.actor,
+.detail {
+  flex-basis: 100%;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px 0 4px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  font: var(--mat-sys-label-medium);
+  background: var(--badge-bg);
+  color: var(--badge-fg);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.tone-public {
+  --badge-bg: var(--app-status-grey-bg);
+  --badge-fg: var(--app-status-grey-fg);
+}
+.tone-internal {
+  --badge-bg: var(--app-status-blue-bg);
+  --badge-fg: var(--app-status-blue-fg);
+}
+.tone-refused {
+  --badge-bg: var(--app-status-red-bg);
+  --badge-fg: var(--app-status-red-fg);
+}
+.tone-correction {
+  --badge-bg: var(--app-status-amber-bg);
+  --badge-fg: var(--app-status-amber-fg);
+}
