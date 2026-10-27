@@ -1,0 +1,56 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 12px 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 16px;
+  font: var(--mat-sys-label-large);
+  white-space: nowrap;
+  background: var(--badge-bg);
+  color: var(--badge-fg);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.tone-grey {
+  --badge-bg: var(--app-status-grey-bg);
+  --badge-fg: var(--app-status-grey-fg);
+}
+.tone-blue {
+  --badge-bg: var(--app-status-blue-bg);
+  --badge-fg: var(--app-status-blue-fg);
+}
+.tone-amber {
+  --badge-bg: var(--app-status-amber-bg);
+  --badge-fg: var(--app-status-amber-fg);
+}
+.tone-purple {
+  --badge-bg: var(--app-status-purple-bg);
+  --badge-fg: var(--app-status-purple-fg);
+}
+.tone-purple-hatched {
+  --badge-bg: var(--app-status-purple-bg);
+  --badge-fg: var(--app-status-purple-fg);
+  border-style: dashed;
+}
+.tone-green {
+  --badge-bg: var(--app-status-green-bg);
+  --badge-fg: var(--app-status-green-fg);
+}
+.tone-red {
+  --badge-bg: var(--app-status-red-bg);
+  --badge-fg: var(--app-status-red-fg);
+}
+.tone-teal {
+  --badge-bg: var(--app-status-teal-bg);
+  --badge-fg: var(--app-status-teal-fg);
+}
+.tone-dark-green {
+  --badge-bg: var(--app-status-dark-green-bg);
+  --badge-fg: var(--app-status-dark-green-fg);
+}
