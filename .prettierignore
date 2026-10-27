@@ -1,0 +1,8 @@
+/dist
+/.angular
+/node_modules
+/src/app/api
+/docs
+/.claude
+package-lock.json
+*.md
