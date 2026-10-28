@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
+import { idempotencyInterceptor } from './core/idempotency/idempotency.interceptor';
 import { jwtInterceptor } from './core/http/jwt.interceptor';
 import { problemDetailsInterceptor } from './core/http/problem-details.interceptor';
 
@@ -14,6 +15,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([jwtInterceptor, problemDetailsInterceptor])),
+    provideHttpClient(
+      withInterceptors([jwtInterceptor, idempotencyInterceptor, problemDetailsInterceptor]),
+    ),
   ],
 };

@@ -3,6 +3,9 @@ export type AppErrorKind =
   | 'forbidden'
   | 'not-found'
   | 'conflict'
+  | 'idempotency-in-progress'
+  | 'idempotency-key-reused'
+  | 'idempotency-key-invalid'
   | 'validation'
   | 'server'
   | 'network'
@@ -15,6 +18,10 @@ export interface AppError {
   readonly message: string;
   /** Problem `type` as sent by the server, for screen-specific allow-lists. */
   readonly problemType?: string;
+  /** Whole seconds from `Retry-After`, only when it is an integer 0..3600. */
+  readonly retryAfterSeconds?: number;
+  /** Set when the bounded in-progress waits ran out. */
+  readonly exhausted?: boolean;
   readonly fieldErrors?: Readonly<Record<string, readonly string[]>>;
   readonly correlationId?: string;
 }
