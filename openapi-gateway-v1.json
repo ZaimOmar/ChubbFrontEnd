@@ -1,0 +1,2872 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Chubb Claims API",
+    "version": "v1"
+  },
+  "paths": {
+    "/claims": {
+      "post": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Submit a claim (Claimant)",
+        "operationId": "SubmitClaim",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "8 to 128 characters of A-Z, a-z, 0-9, underscore and hyphen. A resend with the same key and bytes returns the stored response.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "pattern": "^[A-Za-z0-9_-]{8,128}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimsSubmitClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "Location": {
+                "description": "URL of the created claim.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Idempotent-Replayed": {
+                "description": "true when this is a stored response being replayed.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsClaimantClaimView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role or the claim state does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (domain refusal, or idempotency-request-in-progress with a Retry-After header)",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, set for idempotency-request-in-progress.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body above 64 KB",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "List claims (Officer or Manager)",
+        "operationId": "ListClaims",
+        "parameters": [
+          {
+            "name": "market",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "SG",
+                "HK",
+                "MY",
+                "TH",
+                "ID",
+                "AU"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "Motor",
+                "Property"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "Submitted",
+                "UnderReview",
+                "InfoRequested",
+                "PendingDecisionApproval",
+                "Approved",
+                "Rejected",
+                "PendingSettlementApproval",
+                "Settling",
+                "Settled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "assigneeId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Defaults to newest, or to oldest (open proposal age, then claim number) when status is PendingDecisionApproval.",
+            "schema": {
+              "enum": [
+                "newest",
+                "oldest"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsStaffClaimPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role or the claim state does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/claims/{id}": {
+      "get": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Read a claim; the view depends on the caller's role",
+        "operationId": "GetClaim",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClaimsClaimantClaimView"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ClaimsStaffClaimView"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim not found (also for a claim the caller does not own)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/claims/{id}/timeline": {
+      "get": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Read the claim progress trail; claimants see Public entries only",
+        "operationId": "GetClaimTimeline",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClaimsClaimantTimelineItem"
+                      }
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClaimsStaffTimelineEntry"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim not found (also for a claim the caller does not own)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/claims/{id}/assign": {
+      "post": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Pick up a claim (Officer)",
+        "operationId": "AssignClaim",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "8 to 128 characters of A-Z, a-z, 0-9, underscore and hyphen. A resend with the same key and bytes returns the stored response.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "pattern": "^[A-Za-z0-9_-]{8,128}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimsEmptyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Idempotent-Replayed": {
+                "description": "true when this is a stored response being replayed.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsStaffClaimView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role or the claim state does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim not found (also for a claim the caller does not own)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (domain refusal, or idempotency-request-in-progress with a Retry-After header)",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, set for idempotency-request-in-progress.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body above 64 KB",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/claims/{id}/assessed-amount": {
+      "post": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Record the assessed amount (assigned Officer)",
+        "operationId": "RecordAssessedAmount",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "8 to 128 characters of A-Z, a-z, 0-9, underscore and hyphen. A resend with the same key and bytes returns the stored response.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "pattern": "^[A-Za-z0-9_-]{8,128}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimsAssessedAmountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Idempotent-Replayed": {
+                "description": "true when this is a stored response being replayed.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsStaffClaimView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role or the claim state does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim not found (also for a claim the caller does not own)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (domain refusal, or idempotency-request-in-progress with a Retry-After header)",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, set for idempotency-request-in-progress.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body above 64 KB",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/claims/{id}/decision-proposals": {
+      "post": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Propose approve or reject (assigned Officer)",
+        "operationId": "ProposeDecision",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "8 to 128 characters of A-Z, a-z, 0-9, underscore and hyphen. A resend with the same key and bytes returns the stored response.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "pattern": "^[A-Za-z0-9_-]{8,128}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimsProposeDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Idempotent-Replayed": {
+                "description": "true when this is a stored response being replayed.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsStaffClaimView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role or the claim state does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim not found (also for a claim the caller does not own)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (domain refusal, or idempotency-request-in-progress with a Retry-After header)",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, set for idempotency-request-in-progress.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body above 64 KB",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/claims/{id}/decision-proposals/{pid}/confirm": {
+      "post": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Confirm the open proposal (Manager, never the maker); takes no body",
+        "operationId": "ConfirmDecision",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "8 to 128 characters of A-Z, a-z, 0-9, underscore and hyphen. A resend with the same key and bytes returns the stored response.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "pattern": "^[A-Za-z0-9_-]{8,128}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Idempotent-Replayed": {
+                "description": "true when this is a stored response being replayed.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsStaffClaimView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role or the claim state does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim not found (also for a claim the caller does not own)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (domain refusal, or idempotency-request-in-progress with a Retry-After header)",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, set for idempotency-request-in-progress.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body above 64 KB",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/claims/{id}/decision-proposals/{pid}/send-back": {
+      "post": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Send the proposal back to the maker (Manager)",
+        "operationId": "SendBackDecision",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "8 to 128 characters of A-Z, a-z, 0-9, underscore and hyphen. A resend with the same key and bytes returns the stored response.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "pattern": "^[A-Za-z0-9_-]{8,128}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimsSendBackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Idempotent-Replayed": {
+                "description": "true when this is a stored response being replayed.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsStaffClaimView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role or the claim state does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim not found (also for a claim the caller does not own)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (domain refusal, or idempotency-request-in-progress with a Retry-After header)",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, set for idempotency-request-in-progress.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body above 64 KB",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimsProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/auth/token": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "CreateToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityTokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityHttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "description": "Claimant, own Public alerts. Manager, manager alerts. Newest first.",
+        "operationId": "ListNotifications",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/notifications/{id}/read": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "description": "Marks one notification read. Repeating the call has no further effect.",
+        "operationId": "MarkNotificationRead",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/dashboard/outstanding": {
+      "get": {
+        "tags": [
+          "Reporting"
+        ],
+        "summary": "Outstanding claims by status, market and type (Manager)",
+        "operationId": "GetOutstandingDashboard",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingOutstandingView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/dashboard/exposure": {
+      "get": {
+        "tags": [
+          "Reporting"
+        ],
+        "summary": "Liability exposure in USD by market and type (Manager)",
+        "operationId": "GetExposureDashboard",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingExposureView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/dashboard/pending-approvals": {
+      "get": {
+        "tags": [
+          "Reporting"
+        ],
+        "summary": "Checker queue, oldest proposal first (Manager)",
+        "operationId": "GetPendingApprovals",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingPendingApprovalPageView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid paging parameters",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/staff/workload": {
+      "get": {
+        "tags": [
+          "Reporting"
+        ],
+        "summary": "Open claims per officer by status with ageing (Officer: own, Manager: all)",
+        "operationId": "GetStaffWorkload",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReportingOfficerWorkloadView"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller's role does not allow this",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportingProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [ ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ClaimsAssessedAmountRequest": {
+        "required": [
+          "assessedAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "assessedAmount": {
+            "minimum": 0.01,
+            "type": "number",
+            "format": "decimal"
+          },
+          "note": {
+            "maxLength": 1000,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsClaimantClaimView": {
+        "required": [
+          "id",
+          "claimNumber",
+          "type",
+          "market",
+          "currency",
+          "status",
+          "incidentDate",
+          "description",
+          "estimatedAmount",
+          "submittedAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNumber": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "Motor",
+              "Property"
+            ],
+            "type": "string"
+          },
+          "market": {
+            "enum": [
+              "SG",
+              "HK",
+              "MY",
+              "TH",
+              "ID",
+              "AU"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "Submitted",
+              "UnderReview",
+              "InfoRequested",
+              "PendingDecisionApproval",
+              "Approved",
+              "Rejected",
+              "PendingSettlementApproval",
+              "Settling",
+              "Settled"
+            ],
+            "type": "string"
+          },
+          "incidentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "estimatedAmount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "approvedAmount": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "rejectionReason": {
+            "$ref": "#/components/schemas/ClaimsRejectionReason"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsClaimantTimelineItem": {
+        "required": [
+          "id",
+          "occurredAt",
+          "summary"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsEmptyRequest": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ClaimsMotorDetails": {
+        "required": [
+          "vehicleRegistration",
+          "incidentLocation"
+        ],
+        "type": "object",
+        "properties": {
+          "vehicleRegistration": {
+            "maxLength": 20,
+            "type": "string"
+          },
+          "incidentLocation": {
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsOpenProposalView": {
+        "required": [
+          "id",
+          "outcome",
+          "rationale",
+          "makerId",
+          "proposedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outcome": {
+            "enum": [
+              "Approve",
+              "Reject"
+            ],
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "justification": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimantReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "makerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proposedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsProblemDetails": {
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "correlationId"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "validation-error",
+              "idempotency-key-missing",
+              "idempotency-key-invalid",
+              "idempotency-key-reused",
+              "idempotency-request-in-progress",
+              "unauthorized",
+              "forbidden",
+              "claim-not-found",
+              "payload-too-large",
+              "server-error",
+              "invalid-transition",
+              "claim-already-assigned",
+              "concurrency-conflict",
+              "proposal-pending",
+              "proposal-not-open",
+              "not-assigned-officer",
+              "maker-cannot-check",
+              "policy-not-found",
+              "market-mismatch",
+              "incident-outside-policy-period",
+              "incident-date-in-future",
+              "currency-mismatch",
+              "reason-code-invalid",
+              "assessed-amount-required",
+              "payable-zero",
+              "justification-required",
+              "same-officer",
+              "phase-2-not-enabled"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsPropertyDetails": {
+        "required": [
+          "propertyAddress",
+          "damageType"
+        ],
+        "type": "object",
+        "properties": {
+          "propertyAddress": {
+            "maxLength": 300,
+            "type": "string"
+          },
+          "damageType": {
+            "maxLength": 100,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsProposeDecisionRequest": {
+        "required": [
+          "outcome",
+          "rationale"
+        ],
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "enum": [
+              "Approve",
+              "Reject"
+            ],
+            "type": "string"
+          },
+          "reasonCode": {
+            "enum": [
+              "NOT_COVERED",
+              "POLICY_INACTIVE",
+              "EXCLUSION_APPLIES",
+              "INSUFFICIENT_EVIDENCE",
+              "DUPLICATE_CLAIM",
+              "NO_RESPONSE"
+            ],
+            "type": "string",
+            "nullable": true
+          },
+          "rationale": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "type": "string"
+          },
+          "justification": {
+            "maxLength": 2000,
+            "type": "string",
+            "nullable": true
+          },
+          "claimantReason": {
+            "maxLength": 500,
+            "minLength": 10,
+            "type": "string",
+            "description": "Required for Reject; shown to the claimant after confirmation. The rationale is never shown.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsRejectionReason": {
+        "required": [
+          "code",
+          "label",
+          "claimantReason"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "enum": [
+              "NOT_COVERED",
+              "POLICY_INACTIVE",
+              "EXCLUSION_APPLIES",
+              "INSUFFICIENT_EVIDENCE",
+              "DUPLICATE_CLAIM",
+              "NO_RESPONSE"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "claimantReason": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsSendBackRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsStaffClaimPage": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClaimsStaffClaimView"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsStaffClaimView": {
+        "required": [
+          "id",
+          "claimNumber",
+          "type",
+          "market",
+          "currency",
+          "status",
+          "incidentDate",
+          "description",
+          "estimatedAmount",
+          "claimantId",
+          "policyId",
+          "reserve",
+          "submittedAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNumber": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "Motor",
+              "Property"
+            ],
+            "type": "string"
+          },
+          "market": {
+            "enum": [
+              "SG",
+              "HK",
+              "MY",
+              "TH",
+              "ID",
+              "AU"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "Submitted",
+              "UnderReview",
+              "InfoRequested",
+              "PendingDecisionApproval",
+              "Approved",
+              "Rejected",
+              "PendingSettlementApproval",
+              "Settling",
+              "Settled"
+            ],
+            "type": "string"
+          },
+          "incidentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "estimatedAmount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "claimantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignedOfficerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assessedAmount": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "netPayable": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "reserve": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "payable": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "openProposal": {
+            "$ref": "#/components/schemas/ClaimsOpenProposalView"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsStaffTimelineEntry": {
+        "required": [
+          "id",
+          "occurredAt",
+          "eventType",
+          "actorId",
+          "actorRole",
+          "summary",
+          "visibility"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "eventType": {
+            "enum": [
+              "Submitted",
+              "Assigned",
+              "Reassigned",
+              "InformationRequested",
+              "InformationProvided",
+              "Assessed",
+              "DecisionProposed",
+              "DecisionUnderReview",
+              "DecisionConfirmed",
+              "DecisionAnnounced",
+              "DecisionSentBack",
+              "ProposalWithdrawn",
+              "Correction",
+              "Refused"
+            ],
+            "type": "string"
+          },
+          "fromStatus": {
+            "enum": [
+              "Submitted",
+              "UnderReview",
+              "InfoRequested",
+              "PendingDecisionApproval",
+              "Approved",
+              "Rejected",
+              "PendingSettlementApproval",
+              "Settling",
+              "Settled"
+            ],
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "enum": [
+              "Submitted",
+              "UnderReview",
+              "InfoRequested",
+              "PendingDecisionApproval",
+              "Approved",
+              "Rejected",
+              "PendingSettlementApproval",
+              "Settling",
+              "Settled"
+            ],
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorRole": {
+            "enum": [
+              "Claimant",
+              "Officer",
+              "Manager",
+              "System"
+            ],
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "visibility": {
+            "enum": [
+              "Public",
+              "Internal"
+            ],
+            "type": "string"
+          },
+          "proposalId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "makerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "checkerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referencedEntryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reserveBefore": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "reserveAfter": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsSubmitClaimRequest": {
+        "required": [
+          "policyNumber",
+          "type",
+          "market",
+          "incidentDate",
+          "description",
+          "estimatedAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "policyNumber": {
+            "maxLength": 30,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "Motor",
+              "Property"
+            ],
+            "type": "string"
+          },
+          "market": {
+            "enum": [
+              "SG",
+              "HK",
+              "MY",
+              "TH",
+              "ID",
+              "AU"
+            ],
+            "type": "string"
+          },
+          "incidentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "estimatedAmount": {
+            "minimum": 0.01,
+            "type": "number",
+            "format": "decimal"
+          },
+          "motorDetails": {
+            "$ref": "#/components/schemas/ClaimsMotorDetails"
+          },
+          "propertyDetails": {
+            "$ref": "#/components/schemas/ClaimsPropertyDetails"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdentityHttpValidationProblemDetails": {
+        "required": [
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "additionalProperties": { }
+      },
+      "IdentityLoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdentityProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "IdentityTokenResponse": {
+        "required": [
+          "accessToken",
+          "expiresIn",
+          "tokenType"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NotificationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "correlationId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "NotificationView": {
+        "required": [
+          "id",
+          "kind",
+          "claimId",
+          "message",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "enum": [
+              "ClaimAssigned",
+              "DecisionAwaitsCheck",
+              "ClaimApproved",
+              "ClaimRejected"
+            ],
+            "type": "string"
+          },
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "message": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "NotificationPage": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationView"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReportingCountView": {
+        "required": [
+          "key",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingOldestUnassignedView": {
+        "required": [
+          "claimId",
+          "claimNumber",
+          "market",
+          "type",
+          "submittedAt",
+          "ageHours"
+        ],
+        "type": "object",
+        "properties": {
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNumber": {
+            "type": "string"
+          },
+          "market": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ageHours": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingOutstandingView": {
+        "required": [
+          "total",
+          "awaitingChecker",
+          "byStatus",
+          "byMarket",
+          "byType",
+          "unassignedCount"
+        ],
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "awaitingChecker": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportingCountView"
+            }
+          },
+          "byMarket": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportingCountView"
+            }
+          },
+          "byType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportingCountView"
+            }
+          },
+          "unassignedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "oldestUnassigned": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportingOldestUnassignedView"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingExposureRowView": {
+        "required": [
+          "market",
+          "type",
+          "claimCount",
+          "exposureUsd"
+        ],
+        "type": "object",
+        "properties": {
+          "market": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "claimCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exposureUsd": {
+            "type": "number",
+            "format": "decimal"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingExposureView": {
+        "required": [
+          "currency",
+          "fxAsOf",
+          "totalUsd",
+          "rows"
+        ],
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "fxAsOf": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalUsd": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportingExposureRowView"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingPendingApprovalView": {
+        "required": [
+          "claimId",
+          "claimNumber",
+          "market",
+          "type",
+          "currency",
+          "makerId",
+          "makerName",
+          "proposedAt",
+          "ageHours"
+        ],
+        "type": "object",
+        "properties": {
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNumber": {
+            "type": "string"
+          },
+          "market": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "makerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "makerName": {
+            "type": "string",
+            "description": "Display name, or the short maker id when the name is unknown."
+          },
+          "proposedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ageHours": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingPendingApprovalPageView": {
+        "required": [
+          "page",
+          "pageSize",
+          "totalCount",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportingPendingApprovalView"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingWorkloadStatusView": {
+        "required": [
+          "status",
+          "waitingOnChecker",
+          "count",
+          "oldestAgeDays"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "waitingOnChecker": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "oldestAgeDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingOfficerWorkloadView": {
+        "required": [
+          "officerId",
+          "officerName",
+          "openCount",
+          "byStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "officerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "officerName": {
+            "type": "string",
+            "description": "Display name, or the short officer id when the name is unknown."
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportingWorkloadStatusView"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReportingProblemDetails": {
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "correlationId"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "validation-error",
+              "unauthorized",
+              "forbidden",
+              "server-error"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
