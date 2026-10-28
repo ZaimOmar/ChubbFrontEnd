@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:bundle": "! grep -rIl \"chubb\\.test\" dist/chubb-claims-frontend"
+    "check:bundle": "node scripts/check-bundle.mjs"
   },
   "prettier": {
     "printWidth": 100,

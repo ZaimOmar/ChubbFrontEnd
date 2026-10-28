@@ -8,6 +8,10 @@ const MESSAGES: Record<AppErrorKind, string> = {
   forbidden: 'You are not allowed to do that.',
   'not-found': 'We could not find that claim.',
   conflict: 'This item was changed by someone else. The view has been refreshed.',
+  'idempotency-in-progress': 'Still processing. Please wait.',
+  'idempotency-key-reused':
+    'We could not safely submit this. Please review your entries and submit again.',
+  'idempotency-key-invalid': 'Something went wrong. Please try again.',
   validation: 'Please check the highlighted fields.',
   server: 'Something went wrong. Please try again.',
   network: 'Something went wrong. Please try again.',
@@ -23,6 +27,26 @@ function kindFor(status: number): AppErrorKind {
   if (status === 400 || status === 422) return 'validation';
   if (status >= 500) return 'server';
   return 'unexpected';
+}
+
+function kindForProblem(status: number, type: string | undefined): AppErrorKind {
+  if (status === 409 && type === 'idempotency-request-in-progress')
+    return 'idempotency-in-progress';
+  if (status === 422 && type === 'idempotency-key-reused') return 'idempotency-key-reused';
+  if (
+    status === 400 &&
+    (type === 'idempotency-key-missing' || type === 'idempotency-key-invalid')
+  ) {
+    return 'idempotency-key-invalid';
+  }
+  return kindFor(status);
+}
+
+function readRetryAfter(headers: HttpErrorResponse['headers'] | undefined): number | undefined {
+  const raw = headers?.get('Retry-After')?.trim() ?? '';
+  if (!/^\d+$/.test(raw)) return undefined;
+  const seconds = Number(raw);
+  return seconds <= 3600 ? seconds : undefined;
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -46,15 +70,18 @@ function readFieldErrors(errors: unknown): Record<string, readonly string[]> | u
 
 /** Maps an RFC 7807 response to a safe AppError. The correlation id comes from the header only (A-F5). */
 export function mapProblemDetails(response: HttpErrorResponse): AppError {
-  const kind = kindFor(response.status);
   const body = asRecord(response.error);
+  const problemType = typeof body?.['type'] === 'string' ? body['type'] : undefined;
+  const kind = kindForProblem(response.status, problemType);
   const headerId = response.headers?.get('X-Correlation-Id') ?? null;
 
   return {
     status: response.status,
     kind,
     message: MESSAGES[kind],
-    problemType: typeof body?.['type'] === 'string' ? body['type'] : undefined,
+    problemType,
+    retryAfterSeconds:
+      kind === 'idempotency-in-progress' ? readRetryAfter(response.headers) : undefined,
     fieldErrors: kind === 'validation' ? readFieldErrors(body?.['errors']) : undefined,
     correlationId: headerId !== null && GUID.test(headerId) ? headerId : undefined,
   };

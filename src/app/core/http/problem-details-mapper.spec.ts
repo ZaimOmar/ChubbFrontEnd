@@ -62,4 +62,49 @@ describe('ProblemDetailsMapper', () => {
     const notGuid = new HttpHeaders({ 'X-Correlation-Id': 'abc' });
     expect(mapProblemDetails(failure(500, null, notGuid)).correlationId).toBeUndefined();
   });
+
+  it('Map_409InProgress_DifferentKindFromBusinessConflict', () => {
+    const inProgress = mapProblemDetails(failure(409, { type: 'idempotency-request-in-progress' }));
+    const business = mapProblemDetails(failure(409, { type: 'invalid-transition' }));
+    expect(inProgress.kind).toBe('idempotency-in-progress');
+    expect(business.kind).toBe('conflict');
+    expect(mapProblemDetails(failure(409)).kind).toBe('conflict');
+    expect(mapProblemDetails(failure(500, { type: 'idempotency-request-in-progress' })).kind).toBe(
+      'server',
+    );
+  });
+
+  it('Map_RetryAfter_ParsesIntegerOnly', () => {
+    const type = { type: 'idempotency-request-in-progress' };
+    const retry = (value: string) =>
+      mapProblemDetails(failure(409, type, new HttpHeaders({ 'Retry-After': value })))
+        .retryAfterSeconds;
+    expect(retry('3')).toBe(3);
+    expect(retry('0')).toBe(0);
+    expect(retry('3600')).toBe(3600);
+    expect(retry('3601')).toBeUndefined();
+    expect(retry('1.5')).toBeUndefined();
+    expect(retry('-2')).toBeUndefined();
+    expect(retry('Wed, 21 Oct 2026 07:28:00 GMT')).toBeUndefined();
+    expect(mapProblemDetails(failure(409, type)).retryAfterSeconds).toBeUndefined();
+  });
+
+  it('Map_422KeyReused_Kind', () => {
+    const error = mapProblemDetails(failure(422, { type: 'idempotency-key-reused' }));
+    expect(error.kind).toBe('idempotency-key-reused');
+    expect(error.message).toBe(
+      'We could not safely submit this. Please review your entries and submit again.',
+    );
+    expect(mapProblemDetails(failure(422, { type: 'validation-error' })).kind).toBe('validation');
+  });
+
+  it('Map_400KeyInvalid_Kind', () => {
+    expect(mapProblemDetails(failure(400, { type: 'idempotency-key-missing' })).kind).toBe(
+      'idempotency-key-invalid',
+    );
+    expect(mapProblemDetails(failure(400, { type: 'idempotency-key-invalid' })).kind).toBe(
+      'idempotency-key-invalid',
+    );
+    expect(mapProblemDetails(failure(400, { type: 'validation-error' })).kind).toBe('validation');
+  });
 });

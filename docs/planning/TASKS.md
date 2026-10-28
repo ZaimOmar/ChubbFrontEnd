@@ -2,7 +2,10 @@
 
 Owner: Product Owner. Master list: `../Assessment/AssessmentTasks.md`. Backend list: `../ChubbBackEnd/docs/planning/TASKS.md`. Stories: `../ChubbBackEnd/docs/product/user-stories.md`; rules: `../ChubbBackEnd/docs/domain/business-rules.md`.
 **Format:** `- [ ] [PRIORITY][PHASE] task - stories; rules`. Priority MUST / SHOULD / COULD. Phase **P1** = built within the 5h cap, **P2** = designed, not built.
-All boxes start unticked. Start building only after the backend Claims service is demoable AND the mockup gate below is passed. Backend first; plain tables before charts.
+Ticked = verified on disk (reconciled 2026-10-28: design gate, foundation setup, shared timeline, status badge). Start building only after the backend Claims service is demoable AND the mockup gate below is passed. Backend first; plain tables before charts.
+
+## Phase 1 focus and build order (pointer, human decision 2026-10-28)
+Full text: `../ChubbBackEnd/docs/planning/TASKS.md`, section "Phase 1 focus and build order". Backend order: Claims domain, persistence + DB hardening, API demo-path routes + compose, Kafka publisher, Reporting, Notification. The frontend starts after Claims API demo-path routes (step 3) and runs alongside steps 4 to 6 (two agents at a time). Deferred Claims routes (withdraw, reassign, corrections, info-requests/responses, `/claims/mine`, reference-data) mean their UI is deferred too. The 5h cap is exceeded in practice; any cut must be disclosed in the README/walkthrough.
 
 ## Phase boundary (settled)
 - **P1:** claimant, officer and manager screens for the claim lifecycle up to Approved or Rejected, centred on the claim progress TRAIL and maker-checker on the DECISION.
@@ -10,18 +13,25 @@ All boxes start unticked. Start building only after the backend Claims service i
 - **Cut order:** polish and charts > US-17 refresh > US-11/16/47 views > US-10, US-12 UI, US-31 UI, US-02 (merge into timeline screen), US-05 > US-22 display > US-04/07 UI. Never cut: US-01, 03, 06, 09, 26 to 29, claim trail view, role guards.
 
 ## 1. Design gate (nothing below starts until approved)
-- [ ] [MUST][P1] Mockups for every MUST and SHOULD P1 screen in `docs/mockups/` by `ui-ux-designer`: report form, my claims, claim timeline, respond to info request, decision display, officer queue, officer claim detail with trail, propose-decision form, manager pending-approval queue with confirm/send-back, reassign, outstanding and exposure dashboards, manager claim trail view - US-01 to 07, 09, 12, 13, 14, 26 to 31
-- [ ] [MUST][P1] Human approval recorded per mockup in `docs/mockups/APPROVALS.md`; unapproved screens are not built - process, no story
+- [x] [MUST][P1] Mockups for every MUST and SHOULD P1 screen in `docs/mockups/` by `ui-ux-designer`: report form, my claims, claim timeline, respond to info request, decision display, officer queue, officer claim detail with trail, propose-decision form, manager pending-approval queue with confirm/send-back, reassign, outstanding and exposure dashboards, manager claim trail view - US-01 to 07, 09, 12, 13, 14, 26 to 31
+- [x] [MUST][P1] Human approval recorded per mockup in `docs/mockups/APPROVALS.md`; unapproved screens are not built - process, no story
 - [ ] [SHOULD][P2] Optional mockups (marked "Phase 2 - designed, not built") for payee details, claimant money view, payment exceptions queue, fund, ledger, reconciliation - US-32, 33, 38 to 45; BR-42, BR-62, BR-72
 
 ## 2. Setup
-- [ ] [MUST][P1] Scaffold Angular 20 (standalone, signals, SCSS) with Angular Material - US-25
-- [ ] [MUST][P1] Environment config with Gateway base URL (only the Gateway is ever called) - US-20
+- [x] [MUST][P1] Scaffold Angular 20 (standalone, signals, SCSS) with Angular Material - US-25
+- [x] [MUST][P1] Environment config with Gateway base URL (only the Gateway is ever called) - US-20
 - [ ] [MUST][P1] Generate API client from the Gateway OpenAPI into `src/app/api/` and commit it - US-25 (ADR-003)
-- [ ] [MUST][P1] JWT interceptor (token sent only to the Gateway) and problem-details error handling incl. 401/403/409/422 - US-20, 28; BR-11
-- [ ] [MUST][P1] Auth service (mock login as seeded claimant, officer, manager, dual-role user) plus role guards - US-23; BR-02, BR-32
-- [ ] [MUST][P1] Lazy-loaded areas `/claimant`, `/staff`, `/manager`; redirect by role after login; wrong-role area redirects/403 - US-23; BR-02
-- [ ] [MUST][P1] One shared timeline component used by claimant, officer and manager views (entries ordered by time; Public/Internal badge shown only to staff) - US-03, 09; BR-08, BR-09, BR-12
+- [x] [MUST][P1] JWT interceptor (token sent only to the Gateway) and problem-details error handling incl. 401/403/409/422 - US-20, 28; BR-11
+- [x] [MUST][P1] Auth service (mock login as seeded claimant, officer, manager, dual-role user) plus role guards - US-23; BR-02, BR-32
+- [x] [MUST][P1] Lazy-loaded areas `/claimant`, `/staff`, `/manager`; redirect by role after login; wrong-role area redirects/403 - US-23; BR-02 (area screens are placeholders)
+- [ ] [MUST][P1] Idempotency interceptor/helper: one `Idempotency-Key` (UUID) per user action on every non-GET Claims command (POST /claims, `/assign`, `/assessed-amount`, `/decision-proposals`, `.../confirm`, `.../send-back`, `.../withdraw`, `/reassign`, `/info-requests`, `/info-responses`, `/corrections`); a retry of the same submission with an identical body reuses the key; a new user action or a changed body gets a new key; stored with the pending submission, cleared on success - US-01, 04, 06, 07, 12, 26 to 29, 31; BR-79, BR-80, BR-82, BR-83
+- [ ] [MUST][P1] Submit buttons disabled and show progress while the request is in flight (no double-click second request); re-enabled on any non-replay failure - US-01, 06, 27, 28; BR-85
+- [ ] [MUST][P1] 409 `idempotency-request-in-progress` handling: read `Retry-After` (seconds, expected 1; needs Gateway CORS to expose it, see backend TASKS section 3), wait that long, resend the SAME request with the SAME key, show "still processing"; cap retries (e.g. 5) then show a "try again later" error and keep the key; never treat this 409 as a business conflict and never create a new key for it; a later success or `Idempotent-Replayed: true` clears the pending state - US-01, 06, 26 to 29; BR-85
+- [ ] [MUST][P1] Do not use `Location` or `Idempotent-Replayed` unless exposed by Gateway CORS; fall back to the response body (`id`) if the header is unreadable - US-01; BR-82
+- [ ] [MUST][P1] Distinguish business 409s (`invalid-transition`, `claim-already-assigned`, `proposal-not-open`, `concurrency-conflict`: show message, refresh claim, new key on next action) from 409 `idempotency-request-in-progress` by problem `type` - US-06, 28; BR-38, BR-85
+- [ ] [MUST][P1] Handle 422 `idempotency-key-reused` `idempotency-key-reused` (treat as a client bug: new key, ask the user to review and resubmit; never show the original response); treat `Idempotent-Replayed: true` as success, not as a duplicate; after a stored refusal (403/409 with replay) a new user action uses a new key - US-01, 28; BR-83, BR-85, BR-86
+- [ ] [MUST][P1] Unit tests for the key helper and handling: same key on retry with identical body, new key on new action and on changed body, button disabled in flight, 409 in-progress retry, 422 key-reused message, 409 in-progress waits `Retry-After` then resends with the same key (fake timers; capped retries), business 409 not retried, replay header treated as success, key sent only to the Gateway - US-01, 28; BR-79, BR-82, BR-83, BR-85
+- [x] [MUST][P1] One shared timeline component used by claimant, officer and manager views (entries ordered by time; Public/Internal badge shown only to staff) - US-03, 09; BR-08, BR-09, BR-12
 
 ## 3. Claimant screens (P1)
 - [ ] [MUST][P1] Report incident form: policy no., market, type (dynamic motor/property fields), date, description, amount; validation errors; shows claim number and status Submitted - US-01; BR-04, BR-23, BR-25
@@ -35,26 +45,26 @@ All boxes start unticked. Start building only after the backend Claims service i
 ## 4. Officer (staff) screens (P1)
 - [ ] [MUST][P1] Incoming queue with market/type filters and pick-up; handles 409 when another officer won - US-06; BR-01, BR-26
 - [ ] [MUST][P1] Claim detail with the FULL trail (Public + Internal, each marked, actor, role, reason, maker and checker on proposals) via the shared timeline component - US-09; BR-05, BR-09, BR-12, BR-39
-- [ ] [MUST][P1] Assess: set assessed amount, shows excess, net payable and reserve preview from server response - US-26; BR-19, BR-21, BR-22
+- [ ] [MUST][P1] Assess: `POST /claims/{id}/assessed-amount` `{ assessedAmount, note }`; shows excess, net payable and reserve preview from server response - US-26; BR-19, BR-21, BR-22
 - [ ] [MUST][P1] Propose decision form: approve, or reject with code from the list and text (min 10 chars); inline 422 errors; buttons driven by status and assignment - US-27; BR-17 to BR-19, BR-36
 - [ ] [SHOULD][P1] Withdraw my pending proposal with reason; shows "waiting on checker" state; confirm-won-first 409 handled - US-31; BR-10, BR-38
 - [ ] [SHOULD][P1] Request information (question, shows due date; disabled while a proposal is pending) - US-07; BR-13 to BR-16
-- [ ] [SHOULD][P1] Release/reassign request with reason from claim detail - US-12; BR-27, BR-37
+- [ ] [SHOULD][P1] Hand over to a named officer: `POST /claims/{id}/reassign` `{ newOfficerId, reason }` (reason min 10 chars, officer picker excluding self; only for the current assignee; never an "unassign" option); handles 403 `not-assigned-officer` and 422 `unknown-officer` - US-12; BR-27, BR-37, BR-76
 - [ ] [SHOULD][P1] My workload: open claims by status, ageing, Pending* shown as waiting on checker - US-10; BR-28
-- [ ] [SHOULD][P1] Display refused attempts as Internal "Refused" entries in the trail - US-22; BR-04, BR-32
+- [ ] [SHOULD][P1] Display resource-rule refusals as Internal "Refused" entries in the trail (role-policy 403s never appear there; they show only as a generic "not permitted" message) - US-22; BR-04, BR-32
 - [ ] [COULD][P1] Team table: per-officer counts and handling time - US-11; BR-29
 
 ## 5. Manager screens (P1)
 - [ ] [MUST][P1] Pending-approval queue (oldest first: claim number, market, type, amount, maker, age) with Confirm and Send back (reason min 10 chars); confirm sends only the proposal id, no editable fields; hides Confirm for the maker; shows 403 `maker-cannot-check` clearly - US-28, 29, 30; BR-02, BR-32, BR-34, BR-38
 - [ ] [MUST][P1] Claim trail view: manager opens any claim (not only pending) and reads the full trail - US-09; BR-02, BR-12
-- [ ] [SHOULD][P1] Reassign a claim with reason (explains auto-withdraw of a pending proposal) - US-12; BR-27, BR-37
+- [ ] [SHOULD][P1] Reassign any open claim via `POST /claims/{id}/reassign` `{ newOfficerId, reason }` (explains auto-withdraw of a pending proposal) - US-12; BR-27, BR-37
 - [ ] [MUST][P1] Outstanding claims dashboard: counts by status (Pending* separate), market, type; oldest unassigned (Submitted, no assignee, by submittedAt); optional awaiting-checker subtotal (plain tables acceptable) - US-13; BR-28, BR-76, BR-77
 - [ ] [MUST][P1] Liability exposure by market and type in USD (plain table acceptable) - US-14; BR-22, BR-24, BR-35
 - [ ] [COULD][P1] Refresh via SSE or 5 to 10 s polling - US-17
 - [ ] [COULD][P1] Charts; checker turnaround and send-back rate; time in status - US-47, 16; BR-30, BR-40
 
 ## 6. Shared and quality
-- [ ] [SHOULD][P1] Status badge for all 9 statuses, money pipe by currency, loading and error states - US-03, 05
+- [x] [SHOULD][P1] Status badge for all 9 statuses, money pipe by currency, loading and error states - US-03, 05 (status-badge with spec, money pipe, loading-bar, error-panel on disk)
 - [ ] [SHOULD][P1] Reactive form validation; responsive layout (COULD) - US-01, 27
 - [ ] [SHOULD][P1] Unit tests: guards, claim form, decision form, shared timeline (Public vs Internal rendering), dashboard component - US-03, 09, 27
 - [ ] [COULD][P1] One Playwright smoke test: claimant submits, officer proposes, dual-role refused, manager confirms - US-25
