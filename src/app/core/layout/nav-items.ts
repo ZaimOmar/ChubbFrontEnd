@@ -35,6 +35,7 @@ const MANAGER: NavGroup = {
   items: [
     { label: 'Home', url: '/manager/home', icon: 'dashboard' },
     { label: 'Pending approvals', url: '/manager/pending', icon: 'task_alt' },
+    { label: 'Outstanding claims', url: '/manager/outstanding', icon: 'pending_actions' },
   ],
 };
 

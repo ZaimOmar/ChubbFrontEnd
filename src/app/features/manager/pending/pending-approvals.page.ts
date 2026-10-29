@@ -1,12 +1,16 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ListNavService } from '../../../core/layout/list-nav';
+import { SavedViewsComponent } from '../../../shared/claims/saved-views.component';
 import { ClaimFilterBarComponent } from '../../../shared/claims/claim-filter-bar.component';
 import {
   ClaimFilters,
   FilterField,
   filtersFromParams,
   filtersToParams,
+  listStateFromParams,
+  listStateToParams,
 } from '../../../shared/claims/claim-filters';
 import { MatButtonModule } from '@angular/material/button';
 import { PageEvent } from '@angular/material/paginator';
@@ -31,6 +35,7 @@ import { PageHeaderComponent } from '../../../shared/layout/page-header.componen
     MatButtonModule,
     ClaimListComponent,
     ClaimFilterBarComponent,
+    SavedViewsComponent,
     PageHeaderComponent,
     SectionCardComponent,
     DecisionActionsComponent,
@@ -40,16 +45,13 @@ import { PageHeaderComponent } from '../../../shared/layout/page-header.componen
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-page-header [hidden]="true">Pending approvals</app-page-header>
+    <app-page-header title="Pending approvals" [hiddenTitle]="true" />
     <app-section-card title="Pending approvals" caption="Decisions awaiting a check, oldest first.">
       <div cardActions>
+        <app-saved-views listKey="pending" [presets]="presets" />
         <button mat-stroked-button type="button" (click)="load()">Refresh</button>
       </div>
-      <app-claim-filter-bar
-        [fields]="filterFields"
-        [value]="filters()"
-        (changed)="onFilters($event)"
-      />
+      <app-claim-filter-bar [value]="filters()" (changed)="onFilters($event)" />
       @if (banner(); as text) {
         <div class="banner" role="alert">{{ text }}</div>
       }
@@ -75,6 +77,11 @@ import { PageHeaderComponent } from '../../../shared/layout/page-header.componen
           [rows]="rows()"
           linkBase="/manager/claims"
           mode="pending"
+          [filterFields]="filterFields"
+          [filters]="filters()"
+          (filtersChange)="onFilters($event)"
+          (refresh)="load()"
+          [focusFirst]="focusFirst()"
           caption="Pending approvals, oldest first"
           [actions]="decisionCell"
         />
@@ -89,13 +96,20 @@ export class PendingApprovalsPage {
   private readonly facade = inject(ClaimsFacade);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly listNav = inject(ListNavService);
   private readonly notify = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly rows = signal<readonly ClaimsStaffClaimView[]>([]);
   protected readonly total = signal(0);
+  protected readonly presets = [
+    { name: 'Oldest first', query: '' },
+    { name: 'Motor', query: 'type=Motor' },
+    { name: 'Property', query: 'type=Property' },
+  ];
   protected readonly filterFields: readonly FilterField[] = ['claimNumber', 'market', 'type'];
   protected readonly filters = signal<ClaimFilters>({});
+  protected readonly focusFirst = signal(false);
   protected readonly pageIndex = signal(0);
   protected readonly pageSize = signal(10);
   protected readonly loading = signal(true);
@@ -104,17 +118,21 @@ export class PendingApprovalsPage {
 
   constructor() {
     this.route.queryParams.pipe(takeUntilDestroyed()).subscribe((params) => {
+      this.focusFirst.set(params['focus'] === 'first');
       this.filters.set(filtersFromParams(params, []));
-      this.pageIndex.set(0);
+      const state = listStateFromParams(params, 'oldest');
+      this.pageIndex.set(state.page - 1);
+      this.pageSize.set(state.pageSize);
       this.load();
     });
   }
 
   protected onFilters(next: ClaimFilters): void {
-    void this.router.navigate([], {
-      queryParams: filtersToParams(next),
-      queryParamsHandling: 'merge',
-    });
+    this.navigate({ ...filtersToParams(next), page: null });
+  }
+
+  private navigate(params: Params): void {
+    void this.router.navigate([], { queryParams: params, queryParamsHandling: 'merge' });
   }
 
   protected load(): void {
@@ -123,6 +141,7 @@ export class PendingApprovalsPage {
     this.facade
       .listOldest({
         status: 'PendingDecisionApproval',
+        filters: this.filters(),
         page: this.pageIndex() + 1,
         pageSize: this.pageSize(),
       })
@@ -130,6 +149,11 @@ export class PendingApprovalsPage {
       .subscribe({
         next: (page) => {
           this.rows.set(page.items);
+          this.listNav.remember(
+            this.router.url,
+            page.items.map((r) => r.id),
+            '/manager/claims',
+          );
           this.total.set(page.totalCount);
           this.loading.set(false);
         },
@@ -149,9 +173,12 @@ export class PendingApprovalsPage {
   }
 
   protected onPage(event: PageEvent): void {
-    this.pageIndex.set(event.pageIndex);
-    this.pageSize.set(event.pageSize);
-    this.load();
+    this.navigate(
+      listStateToParams(
+        { page: event.pageIndex + 1, pageSize: event.pageSize, sort: 'oldest' },
+        'oldest',
+      ),
+    );
   }
 
   protected onFinished(result: DecisionResult): void {

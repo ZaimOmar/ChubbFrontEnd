@@ -33,7 +33,7 @@ import { ClaimStepperComponent } from './claim-stepper.component';
       width: 36px;
       height: 36px;
       padding: 0;
-      color: var(--slate-400);
+      color: var(--slate-500);
       background: none;
       border: 0;
       border-radius: 12px;

@@ -14,6 +14,12 @@ export const MANAGER_ROUTES: Routes = [
       import('./pending/pending-approvals.page').then((m) => m.PendingApprovalsPage),
   },
   {
+    path: 'outstanding',
+    title: 'Outstanding claims - Chubb Claims',
+    loadComponent: () =>
+      import('./outstanding/outstanding-claims.page').then((m) => m.OutstandingClaimsPage),
+  },
+  {
     path: 'claims/:id',
     title: 'Claim - Chubb Claims',
     loadComponent: () =>

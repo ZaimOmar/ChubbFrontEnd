@@ -6,6 +6,7 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
   untracked,
 } from '@angular/core';
@@ -15,6 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { ClaimsStaffClaimView, ClaimsStaffTimelineEntry } from '../../../api/model/models';
 import { isStaffView } from '../../../core/claims/claim-views';
+import { RecentClaimsService } from '../../../core/layout/recent-claims';
 import { BreadcrumbService } from '../../../core/layout/breadcrumbs';
 import { ClaimsFacade } from '../../../core/claims/claims.facade';
 import { partyLabel } from '../../../core/claims/party-label';
@@ -28,6 +30,11 @@ import { LoadingBarComponent } from '../../../shared/loading-bar/loading-bar.com
 import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 import { MoneyPipe } from '../../../shared/pipes/money.pipe';
 import { AssessDialogComponent } from './assess-dialog.component';
+import {
+  PickUpButtonComponent,
+  PickUpResult,
+} from '../../../shared/claims/pick-up-button.component';
+import { PageHeaderComponent } from '../../../shared/layout/page-header.component';
 import { ClaimHeaderCardComponent } from '../../../shared/claims/claim-header-card.component';
 import { DecisionCardComponent } from '../../../shared/claims/decision-card.component';
 import { ClaimSummaryCardComponent } from '../../../shared/claims/claim-summary-card.component';
@@ -42,6 +49,8 @@ const UNEXPECTED: AppError = {
 @Component({
   selector: 'app-officer-claim-detail-page',
   imports: [
+    PageHeaderComponent,
+    PickUpButtonComponent,
     ClaimSummaryCardComponent,
     DecisionCardComponent,
     ClaimHeaderCardComponent,
@@ -55,6 +64,9 @@ const UNEXPECTED: AppError = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    @if (!embedded()) {
+      <app-page-header />
+    }
     @if (loading()) {
       <app-loading-bar />
     } @else if (error(); as problem) {
@@ -71,6 +83,9 @@ const UNEXPECTED: AppError = {
         [subtitle]="subtitle()"
         (refresh)="load()"
       />
+      @if (banner(); as text) {
+        <div class="banner" role="alert">{{ text }}</div>
+      }
       <div class="detail-layout">
         @if (c.openProposal; as p) {
           <app-decision-card
@@ -123,6 +138,15 @@ const UNEXPECTED: AppError = {
                   : 'No actions available for this status.'
               }}
             </p>
+            @if (c.status === 'Submitted') {
+              <div cardFooter class="card-foot">
+                <app-pick-up-button
+                  [claimId]="c.id"
+                  [claimNumber]="c.claimNumber"
+                  (finished)="onPickedUp($event)"
+                />
+              </div>
+            }
           </app-decision-card>
         }
         <app-claim-summary-card class="summary" [items]="summaryItems()" />
@@ -140,6 +164,10 @@ const UNEXPECTED: AppError = {
 })
 export class OfficerClaimDetailPage {
   readonly id = input.required<string>();
+  private readonly recent = inject(RecentClaimsService);
+  /** Inside the queue workspace: no title row, and the list is told when the claim changed. */
+  readonly embedded = input(false);
+  readonly changed = output<void>();
   protected readonly subtitle = computed(() => {
     const c = this.claim();
     return c ? claimSubtitle(c) : '';
@@ -156,6 +184,7 @@ export class OfficerClaimDetailPage {
   private readonly auth = inject(AuthService);
 
   protected readonly claim = signal<ClaimsStaffClaimView | null>(null);
+  protected readonly banner = signal<string | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal<AppError | null>(null);
   protected readonly timeline = signal<readonly TimelineEntry[]>([]);
@@ -198,7 +227,13 @@ export class OfficerClaimDetailPage {
   });
 
   constructor() {
-    effect(() => this.breadcrumbs.leaf.set(this.claim()?.claimNumber ?? null));
+    effect(() => {
+      const c = this.claim();
+      if (c) this.recent.add({ id: c.id, number: c.claimNumber, base: '/staff/claims' });
+    });
+    effect(() => {
+      if (!this.embedded()) this.breadcrumbs.leaf.set(this.claim()?.claimNumber ?? null);
+    });
     inject(DestroyRef).onDestroy(() => this.breadcrumbs.leaf.set(null));
     effect(() => {
       this.id();
@@ -244,6 +279,12 @@ export class OfficerClaimDetailPage {
       });
   }
 
+  protected onPickedUp(result: PickUpResult): void {
+    this.banner.set(result.ok ? null : result.message);
+    this.load();
+    this.changed.emit();
+  }
+
   protected openAssess(): void {
     const claim = this.claim();
     if (!claim) return;
@@ -257,6 +298,7 @@ export class OfficerClaimDetailPage {
       .subscribe((updated) => {
         if (updated) this.claim.set(updated);
         this.loadTimeline();
+        this.changed.emit();
       });
   }
 }

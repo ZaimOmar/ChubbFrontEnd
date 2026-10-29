@@ -240,7 +240,7 @@ button:focus-visible,
   font: 700 10px/16px var(--font-mono);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--slate-400);
+  color: var(--slate-500);
 }
 
 // Section card (every section wrapper in the reference).
@@ -363,7 +363,7 @@ button:focus-visible,
   font: 400 10px/16px var(--font-mono);
 }
 .mat-mdc-form-field-hint {
-  color: var(--slate-400);
+  color: var(--slate-500);
 }
 
 .cdk-visually-hidden-text {
@@ -450,7 +450,7 @@ mat-card.mat-mdc-card {
   font: 400 11px/16px var(--font-mono);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--slate-400);
+  color: var(--slate-500);
 }
 .field-box {
   position: relative;
@@ -478,7 +478,7 @@ mat-card.mat-mdc-card {
   width: 20px;
   height: 20px;
   font-size: 20px;
-  color: var(--slate-400);
+  color: var(--slate-500);
   pointer-events: none;
 }
 .field-prefix + .field-control {
@@ -505,7 +505,7 @@ select.field-control {
 .field-box .field-suffix {
   margin: 0 4px;
   padding: 4px;
-  color: var(--slate-400);
+  color: var(--slate-500);
   background: none;
   border: 0;
   border-radius: 8px;
@@ -517,7 +517,7 @@ select.field-control {
   gap: 8px;
   padding-top: 4px;
   font: 400 10px/16px var(--font-mono);
-  color: var(--slate-400);
+  color: var(--slate-500);
 }
 .has-error .field-foot {
   color: #dc2626;
@@ -627,7 +627,7 @@ fieldset .mat-mdc-radio-group {
 }
 .notification-panel .when {
   font: 400 11px/16px var(--font-sans);
-  color: var(--slate-400);
+  color: var(--slate-500);
 }
 
 // Claim detail layout: decision card and timeline on the left, sticky summary on the right.
@@ -666,4 +666,152 @@ app-decision-card .card-foot {
 }
 .header-card {
   margin-bottom: 24px;
+}
+
+// Account menu (rail): identity, density, log out, copyright line.
+.account-menu.mat-mdc-menu-panel {
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  box-shadow: var(--shadow-2xl);
+}
+.account-menu .account-head {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  font: 400 12px/16px var(--font-mono);
+  color: var(--slate-500);
+  border-bottom: 1px solid var(--slate-100);
+}
+.account-menu .account-head strong {
+  color: var(--slate-900);
+}
+.account-menu .account-label {
+  padding: 8px 16px 0;
+  font: 700 10px/16px var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--slate-500);
+}
+.account-menu .account-foot {
+  padding: 8px 16px;
+  font: 400 10px/16px var(--font-mono);
+  color: var(--slate-500);
+  border-top: 1px solid var(--slate-100);
+}
+.account-menu .mat-mdc-menu-item {
+  font: 400 12px/16px var(--font-mono);
+}
+
+// Rail row: one component for every rail entry (nav, search, bell, user, collapse).
+.rail-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  padding: 0 8px;
+  color: var(--slate-500);
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 12px;
+  font: 400 12px/16px var(--font-mono);
+  cursor: pointer;
+}
+.rail-row:hover {
+  color: var(--slate-800);
+  background: var(--slate-100);
+}
+.rail-row.active {
+  color: #fff;
+  background: var(--indigo-600);
+  font-weight: 700;
+}
+.rail-row[aria-disabled='true'] {
+  cursor: default;
+}
+.rail-row:focus-visible {
+  outline: 2px solid var(--indigo-500);
+  outline-offset: 2px;
+}
+.rail-row .icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.rail-row .label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rail-row .badge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  font: 700 9px/16px var(--font-sans);
+  color: #fff;
+  background: var(--red-500);
+  border-radius: 9999px;
+}
+.rail-row .avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font: 700 10px/16px var(--font-sans);
+  color: #fff;
+  background: var(--indigo-600);
+  border-radius: 9999px;
+}
+.rail-row .who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rail-row .who strong {
+  color: var(--slate-900);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rail-row .who span {
+  font-size: 10px;
+  color: var(--slate-500);
+}
+.rail:not(.expanded) .rail-row {
+  justify-content: center;
+  width: 40px;
+  padding: 0;
+}
+.rail:not(.expanded) .rail-row .label {
+  display: none;
+}
+.rail-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--slate-200);
+}
+
+.palette-panel .mat-mdc-dialog-surface {
+  border-radius: 16px;
+  box-shadow: var(--shadow-2xl);
 }

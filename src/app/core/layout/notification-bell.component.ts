@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth/auth.service';
 import { catchError, EMPTY, of, startWith, Subject, switchMap, timer } from 'rxjs';
 import { NotificationView } from '../../api/model/models';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
@@ -17,14 +18,18 @@ import { DashboardFacade } from '../dashboard/dashboard.facade';
 
 const POLL_MS = 60_000;
 
-/** Where a notification's claim opens, by the kind of event (UX routing only). */
-function claimUrl(n: NotificationView): string {
+/** The claim view of the signed-in user's own area (UX routing only; the API decides access). */
+function claimUrl(n: NotificationView, roles: readonly string[]): string {
   const area =
-    n.kind === 'DecisionAwaitsCheck'
-      ? 'manager'
-      : n.kind === 'ClaimAssigned'
-        ? 'staff'
-        : 'claimant';
+    roles.includes('Claimant') && roles.length === 1
+      ? 'claimant'
+      : n.kind === 'DecisionAwaitsCheck' && roles.includes('Manager')
+        ? 'manager'
+        : roles.includes('Officer')
+          ? 'staff'
+          : roles.includes('Manager')
+            ? 'manager'
+            : 'claimant';
   return `/${area}/claims/${n.claimId}`;
 }
 
@@ -33,26 +38,29 @@ function claimUrl(n: NotificationView): string {
   selector: 'app-notification-bell',
   imports: [MatIconModule, MatMenuModule, DateTimePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './notification-bell.component.scss',
+  styles: `
+    :host {
+      display: block;
+    }
+  `,
   template: `
     <button
       type="button"
-      class="bell"
+      class="rail-row"
       [matMenuTriggerFor]="panel"
       [attr.aria-label]="label()"
       (menuOpened)="refresh.next()"
     >
-      <mat-icon aria-hidden="true">notifications</mat-icon>
-      @if (unread() > 0) {
-        <span class="badge" aria-hidden="true">{{ unread() > 9 ? '9+' : unread() }}</span>
-      }
+      <span class="icon">
+        <mat-icon aria-hidden="true">notifications</mat-icon>
+        @if (unread() > 0) {
+          <span class="badge" aria-hidden="true">{{ unread() > 9 ? '9+' : unread() }}</span>
+        }
+      </span>
+      <span class="label">Notifications</span>
     </button>
-    <mat-menu #panel="matMenu" class="notification-panel" xPosition="before">
-      <div
-        class="panel-head"
-        (click)="$event.stopPropagation()"
-        (keydown)="$event.stopPropagation()"
-      >
+    <mat-menu #panel="matMenu" class="notification-panel" xPosition="after" yPosition="above">
+      <div class="panel-head">
         <h2>Notifications</h2>
       </div>
       @if (loading() && items().length === 0) {
@@ -83,6 +91,7 @@ function claimUrl(n: NotificationView): string {
 export class NotificationBellComponent {
   private readonly facade = inject(DashboardFacade);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly refresh = new Subject<void>();
@@ -120,6 +129,6 @@ export class NotificationBellComponent {
         )
         .subscribe();
     }
-    if (n.claimId) void this.router.navigateByUrl(claimUrl(n));
+    if (n.claimId) void this.router.navigateByUrl(claimUrl(n, this.auth.roles()));
   }
 }

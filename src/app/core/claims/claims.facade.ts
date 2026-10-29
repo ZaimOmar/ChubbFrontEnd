@@ -21,7 +21,9 @@ import { ClaimView } from './claim-views';
 type MineStatus = Parameters<ClaimsApi['listMyClaims']>[2];
 
 export interface ListParams {
-  readonly status: ClaimsStaffClaimView['status'];
+  readonly status?: ClaimsStaffClaimView['status'];
+  readonly assigneeId?: string;
+  readonly outstanding?: boolean;
   readonly filters?: ClaimFilters;
   readonly page: number;
   readonly pageSize: number;
@@ -47,8 +49,9 @@ export class ClaimsFacade {
     return this.api.listClaims(
       f.market,
       f.type,
-      params.status,
-      undefined,
+      params.status ?? (f.status as ClaimsStaffClaimView['status'] | undefined),
+      params.outstanding,
+      params.assigneeId,
       f.claimNumber,
       f.minAmount,
       f.maxAmount,
@@ -63,6 +66,7 @@ export class ClaimsFacade {
   /** Claims assigned to an officer (up to 100), oldest first. */
   listAssigned(assigneeId: string): Observable<ClaimsStaffClaimPage> {
     return this.api.listClaims(
+      undefined,
       undefined,
       undefined,
       undefined,

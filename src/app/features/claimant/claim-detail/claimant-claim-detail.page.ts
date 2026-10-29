@@ -11,6 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ClaimsClaimantClaimView } from '../../../api/model/models';
 import { isStaffView } from '../../../core/claims/claim-views';
+import { RecentClaimsService } from '../../../core/layout/recent-claims';
 import { BreadcrumbService } from '../../../core/layout/breadcrumbs';
 import { ClaimsFacade } from '../../../core/claims/claims.facade';
 import { toClaimantTimeline } from '../../../core/claims/timeline-mapper';
@@ -21,6 +22,7 @@ import { ErrorPanelComponent } from '../../../shared/error-panel/error-panel.com
 import { LoadingBarComponent } from '../../../shared/loading-bar/loading-bar.component';
 import { MoneyPipe } from '../../../shared/pipes/money.pipe';
 import { claimSubtitle, claimantSummaryItems } from '../../../shared/claims/summary-items';
+import { PageHeaderComponent } from '../../../shared/layout/page-header.component';
 import { ClaimHeaderCardComponent } from '../../../shared/claims/claim-header-card.component';
 import { DecisionCardComponent } from '../../../shared/claims/decision-card.component';
 import { ClaimSummaryCardComponent } from '../../../shared/claims/claim-summary-card.component';
@@ -38,6 +40,7 @@ function asAppError(error: unknown): AppError {
 @Component({
   selector: 'app-claimant-claim-detail-page',
   imports: [
+    PageHeaderComponent,
     ClaimSummaryCardComponent,
     DecisionCardComponent,
     ClaimHeaderCardComponent,
@@ -48,6 +51,7 @@ function asAppError(error: unknown): AppError {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <app-page-header />
     @if (loading()) {
       <app-loading-bar />
     } @else if (error(); as problem) {
@@ -102,6 +106,7 @@ function asAppError(error: unknown): AppError {
 })
 export class ClaimantClaimDetailPage {
   readonly id = input.required<string>();
+  private readonly recent = inject(RecentClaimsService);
   protected readonly subtitle = computed(() => {
     const c = this.claim();
     return c ? claimSubtitle(c) : '';
@@ -131,6 +136,10 @@ export class ClaimantClaimDetailPage {
   protected readonly timelineError = signal<AppError | null>(null);
 
   constructor() {
+    effect(() => {
+      const c = this.claim();
+      if (c) this.recent.add({ id: c.id, number: c.claimNumber, base: '/claimant/claims' });
+    });
     effect(() => this.breadcrumbs.leaf.set(this.claim()?.claimNumber ?? null));
     inject(DestroyRef).onDestroy(() => this.breadcrumbs.leaf.set(null));
     effect(() => {

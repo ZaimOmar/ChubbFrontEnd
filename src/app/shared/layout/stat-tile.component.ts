@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Params, RouterLink } from '@angular/router';
 
 /** KPI tile styled as the reference gauge card (section 14); the whole tile is a link. */
 @Component({
@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a class="tile" [routerLink]="link()">
+    <a class="tile" [routerLink]="link()" [queryParams]="queryParams()">
       <span class="eyebrow">{{ label() }}</span>
       <span class="value">{{ value() }}</span>
       @if (hint()) {
@@ -43,7 +43,7 @@ import { RouterLink } from '@angular/router';
     }
     .hint {
       font-size: 10px;
-      color: var(--slate-400);
+      color: var(--slate-500);
     }
   `,
 })
@@ -52,4 +52,5 @@ export class StatTileComponent {
   readonly value = input.required<string | number>();
   readonly hint = input<string>('');
   readonly link = input.required<string>();
+  readonly queryParams = input<Params | undefined>();
 }
