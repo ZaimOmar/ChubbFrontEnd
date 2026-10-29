@@ -32,7 +32,7 @@ const PREVIEW = 5;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-page-header>Welcome back</app-page-header>
+    <app-page-header title="Welcome back" />
     @if (isManager()) {
       <p><a routerLink="/manager/home">Switch to Manager view</a></p>
     }
@@ -48,12 +48,14 @@ const PREVIEW = 5;
         [value]="assigned.value()?.totalCount ?? '-'"
         hint="View"
         link="/staff/queue"
+        [queryParams]="{ tab: 'mine' }"
       />
       <app-stat-tile
         label="Waiting on checker"
         [value]="waitingOnChecker()"
         hint="Of my assigned claims"
         link="/staff/queue"
+        [queryParams]="{ tab: 'mine', status: 'PendingDecisionApproval' }"
       />
       @if (incoming.value()?.items?.[0]; as oldest) {
         <app-stat-tile

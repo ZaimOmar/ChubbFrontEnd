@@ -14,12 +14,18 @@ export function claimSubtitle(c: { type: string; market: string; submittedAt: st
 
 export function claimantSummaryItems(c: ClaimsClaimantClaimView): SummaryItem[] {
   return [
-    { label: 'Type', value: c.type },
-    { label: 'Market', value: c.market },
-    { label: 'Incident date', value: dates.transform(c.incidentDate, 'date') },
-    { label: 'Amount claimed', value: money.transform(c.estimatedAmount, c.currency) },
-    { label: 'Submitted', value: dates.transform(c.submittedAt) },
-    { label: 'Description', value: c.description },
+    { section: 'Claim', label: 'Type', value: c.type },
+    { section: 'Claim', label: 'Market', value: c.market },
+    { section: 'Claim', label: 'Incident date', value: dates.transform(c.incidentDate, 'date') },
+    { section: 'Claim', label: 'Submitted', value: dates.transform(c.submittedAt) },
+    {
+      section: 'Money',
+      label: 'Amount claimed',
+      value: money.transform(c.estimatedAmount, c.currency),
+      numeric: true,
+      emphasis: true,
+    },
+    { section: 'Description', label: 'Description', value: c.description },
   ];
 }
 
@@ -27,21 +33,38 @@ export function staffSummaryItems(
   c: ClaimsStaffClaimView,
   currentUserId: string | undefined,
 ): SummaryItem[] {
-  const optional = (amount: number | null | undefined): string =>
-    amount === null || amount === undefined ? 'Not set' : money.transform(amount, c.currency);
+  const optional = (label: string, amount: number | null | undefined): SummaryItem => ({
+    section: 'Money',
+    label,
+    value: amount === null || amount === undefined ? '' : money.transform(amount, c.currency),
+    numeric: true,
+    unset: amount === null || amount === undefined,
+  });
   return [
-    { label: 'Type', value: c.type },
-    { label: 'Market', value: c.market },
-    { label: 'Incident date', value: dates.transform(c.incidentDate, 'date') },
-    { label: 'Amount claimed', value: money.transform(c.estimatedAmount, c.currency) },
-    { label: 'Submitted', value: dates.transform(c.submittedAt) },
+    { section: 'Claim', label: 'Type', value: c.type },
+    { section: 'Claim', label: 'Market', value: c.market },
+    { section: 'Claim', label: 'Incident date', value: dates.transform(c.incidentDate, 'date') },
+    { section: 'Claim', label: 'Submitted', value: dates.transform(c.submittedAt) },
     {
+      section: 'Money',
+      label: 'Amount claimed',
+      value: money.transform(c.estimatedAmount, c.currency),
+      numeric: true,
+      emphasis: true,
+    },
+    optional('Assessed amount', c.assessedAmount),
+    optional('Net payable', c.netPayable),
+    {
+      section: 'Money',
+      label: 'Reserve',
+      value: money.transform(c.reserve, c.currency),
+      numeric: true,
+    },
+    {
+      section: 'Handling',
       label: 'Assigned to',
       value: partyLabel(c.assignedOfficerId, 'Officer', currentUserId) || 'Unassigned',
     },
-    { label: 'Assessed amount', value: optional(c.assessedAmount) },
-    { label: 'Net payable', value: optional(c.netPayable) },
-    { label: 'Reserve', value: money.transform(c.reserve, c.currency) },
-    { label: 'Description', value: c.description },
+    { section: 'Description', label: 'Description', value: c.description },
   ];
 }

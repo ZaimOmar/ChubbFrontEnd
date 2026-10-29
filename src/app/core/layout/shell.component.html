@@ -1,81 +1,136 @@
 <a class="skip-link" href="#main-content" (click)="skipToMain($event, main)"
   >Skip to main content</a
 >
-<header class="topbar">
-  <div class="left">
-    <a class="brand" [routerLink]="homeUrl()">
-      <span class="logo" aria-hidden="true"><mat-icon>verified_user</mat-icon></span>
-      <span class="titles">
-        <span class="title">Chubb Claims</span>
-        @if (crumbs().length > 0) {
-          <nav class="crumbs" aria-label="Breadcrumb" (click)="$event.stopPropagation()">
-            <ol>
-              @for (crumb of crumbs(); track $index; let last = $last) {
-                <li>
-                  @if (crumb.url && !last) {
-                    <a [routerLink]="crumb.url">{{ crumb.label }}</a>
-                    <mat-icon aria-hidden="true">chevron_right</mat-icon>
-                  } @else {
-                    <span [attr.aria-current]="last ? 'page' : null">{{ crumb.label }}</span>
-                  }
-                </li>
-              }
-            </ol>
-          </nav>
-        }
-      </span>
-    </a>
-  </div>
-  @defer (on idle) {
-    <app-notification-bell />
-  }
-</header>
-<div class="body">
-  <nav class="rail" aria-label="Main">
-    @for (group of groups(); track group.heading; let last = $last) {
-      @for (item of group.items; track item.url) {
-        <a
-          class="rail-item"
-          [routerLink]="item.url"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          [attr.aria-label]="labelFor(group, item.label)"
-          [matTooltip]="labelFor(group, item.label)"
-          matTooltipPosition="right"
-        >
-          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
-        </a>
-      }
-      @if (!last) {
-        <span class="rail-divider" aria-hidden="true"></span>
-      }
-    }
-    <div class="rail-user">
-      @if (userName()) {
-        <span
-          class="avatar"
-          role="img"
-          tabindex="0"
-          [attr.aria-label]="userName() + ', ' + roleText()"
-          [matTooltip]="userName() + ', ' + roleText()"
-          matTooltipPosition="right"
-          >{{ initials() }}</span
-        >
-      }
+<div class="app">
+  @if (isMobile()) {
+    <header class="mobile-top">
       <button
         type="button"
-        class="rail-item"
-        aria-label="Log out"
-        matTooltip="Log out"
-        matTooltipPosition="right"
-        (click)="logout.emit()"
+        class="rail-row"
+        aria-label="Open navigation"
+        [attr.aria-expanded]="drawerOpen()"
+        (click)="toggleRail()"
       >
-        <mat-icon aria-hidden="true">logout</mat-icon>
+        <mat-icon aria-hidden="true">menu</mat-icon>
       </button>
+      <a class="brand-text" [routerLink]="homeUrl()">Chubb</a>
+      <span class="spacer"></span>
+      @defer (on idle) {
+        <app-notification-bell />
+        <app-user-menu
+          [userName]="userName()"
+          [roleText]="roleText()"
+          (logout)="logout.emit()"
+          (help)="shortcuts.openHelp()"
+        />
+      }
+    </header>
+  }
+  @if (isMobile() && drawerOpen()) {
+    <button
+      type="button"
+      class="backdrop"
+      aria-label="Close navigation"
+      (click)="drawerOpen.set(false)"
+    ></button>
+  }
+  <nav
+    class="rail"
+    aria-label="Main"
+    [class.expanded]="expanded()"
+    [class.mobile]="isMobile()"
+    [class.open]="drawerOpen()"
+  >
+    <a class="brand" [routerLink]="homeUrl()" aria-label="Chubb Claims home">
+      <span class="logo" aria-hidden="true"><mat-icon>verified_user</mat-icon></span>
+      @if (expanded()) {
+        <span class="brand-label">Chubb Claims</span>
+      }
+    </a>
+    <div class="items">
+      @for (group of groups(); track group.heading; let last = $last) {
+        @if (isMultiGroup() && expanded()) {
+          <span class="group-heading">{{ group.heading }}</span>
+        }
+        @for (item of group.items; track item.url) {
+          <a
+            class="rail-row"
+            [routerLink]="item.url"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            [attr.aria-label]="labelFor(group, item.label)"
+            [matTooltip]="labelFor(group, item.label)"
+            [matTooltipDisabled]="expanded()"
+            matTooltipPosition="right"
+            (click)="drawerOpen.set(false)"
+          >
+            <span class="icon"
+              ><mat-icon aria-hidden="true">{{ item.icon }}</mat-icon></span
+            >
+            <span class="label">{{ item.label }}</span>
+          </a>
+        }
+        @if (!last) {
+          <span class="rail-divider" aria-hidden="true"></span>
+        }
+      }
+    </div>
+    <div class="bottom">
+      <button
+        type="button"
+        class="rail-row"
+        aria-label="Search and commands, Control K"
+        matTooltip="Search (Ctrl+K)"
+        matTooltipPosition="right"
+        (click)="shortcuts.openPalette()"
+      >
+        <span class="icon"><mat-icon aria-hidden="true">search</mat-icon></span>
+        <span class="label">Search</span>
+        @if (expanded()) {
+          <kbd>Ctrl+K</kbd>
+        }
+      </button>
+      @if (!isMobile()) {
+        @defer (on idle) {
+          <app-notification-bell />
+          <span class="rail-divider" aria-hidden="true"></span>
+          <app-user-menu
+            [userName]="userName()"
+            [roleText]="roleText()"
+            (logout)="logout.emit()"
+            (help)="shortcuts.openHelp()"
+          />
+        }
+        <button
+          type="button"
+          class="rail-row toggle"
+          [attr.aria-label]="expanded() ? 'Collapse navigation' : 'Expand navigation'"
+          [attr.aria-expanded]="expanded()"
+          [matTooltip]="expanded() ? 'Collapse ([)' : 'Expand ([)'"
+          matTooltipPosition="right"
+          (click)="toggleRail()"
+        >
+          <span class="icon"
+            ><mat-icon aria-hidden="true">{{
+              expanded() ? 'chevron_left' : 'chevron_right'
+            }}</mat-icon></span
+          >
+          <span class="label">Collapse</span>
+        </button>
+      }
     </div>
   </nav>
-  <main id="main-content" #main tabindex="-1">
+  <main id="main-content" #main tabindex="-1" [class.compact]="prefs.density() === 'compact'">
     <ng-content />
   </main>
+  @if (isMobile()) {
+    <nav class="bottom-nav" aria-label="Quick navigation">
+      @for (item of bottomItems(); track item.url) {
+        <a [routerLink]="item.url" routerLinkActive="active" ariaCurrentWhenActive="page">
+          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  }
 </div>
-<footer class="footer">zaimomar@copyright 2026</footer>

@@ -65,6 +65,11 @@ export class AuthService {
   }
 
   logout(): void {
+    try {
+      localStorage.removeItem('chubb.draft.report');
+    } catch {
+      // Storage unavailable: nothing to clear.
+    }
     this.sessionState.set(null);
     this.store.clear();
   }

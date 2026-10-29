@@ -88,3 +88,28 @@ export function chipsFor(filters: ClaimFilters): readonly FilterChip[] {
 export function withoutFilter(filters: ClaimFilters, key: string): ClaimFilters {
   return { ...filters, [key]: undefined };
 }
+
+/** Paging and sort kept in the URL next to the filters. */
+export interface ListState {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly sort: 'newest' | 'oldest';
+}
+
+export function listStateFromParams(params: Params, defaultSort: ListState['sort']): ListState {
+  const page = Number(params['page']);
+  const size = Number(params['pageSize']);
+  return {
+    page: Number.isInteger(page) && page >= 1 ? page : 1,
+    pageSize: [10, 20, 50].includes(size) ? size : 10,
+    sort: params['sort'] === 'newest' || params['sort'] === 'oldest' ? params['sort'] : defaultSort,
+  };
+}
+
+export function listStateToParams(state: ListState, defaultSort: ListState['sort']): Params {
+  return {
+    page: state.page > 1 ? state.page : null,
+    pageSize: state.pageSize !== 10 ? state.pageSize : null,
+    sort: state.sort !== defaultSort ? state.sort : null,
+  };
+}

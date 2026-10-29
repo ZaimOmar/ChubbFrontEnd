@@ -71,7 +71,7 @@ const UNEXPECTED: AppError = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-page-header [hidden]="true">Propose a decision</app-page-header>
+    <app-page-header title="Propose a decision" [hiddenTitle]="true" />
     <app-section-card
       title="Propose a decision"
       caption="A manager must confirm before the claimant is told the result."

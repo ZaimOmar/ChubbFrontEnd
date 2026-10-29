@@ -6,6 +6,7 @@ export interface ConfirmDialogData {
   readonly title: string;
   readonly lines: readonly string[];
   readonly confirmLabel: string;
+  readonly cancelLabel?: string;
 }
 
 /** Text-labelled confirmation (00 section 7). Closes with `true` when confirmed. */
@@ -21,7 +22,9 @@ export interface ConfirmDialogData {
       }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button type="button" [mat-dialog-close]="false">Cancel</button>
+      <button mat-button type="button" [mat-dialog-close]="false">
+        {{ data.cancelLabel ?? 'Cancel' }}
+      </button>
       <button mat-flat-button type="button" [mat-dialog-close]="true">
         {{ data.confirmLabel }}
       </button>

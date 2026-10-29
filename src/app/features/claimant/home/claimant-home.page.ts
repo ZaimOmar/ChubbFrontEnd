@@ -22,7 +22,7 @@ import { LoadingBarComponent } from '../../../shared/loading-bar/loading-bar.com
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-page-header>Welcome back</app-page-header>
+    <app-page-header title="Welcome back" />
     <section class="card" aria-labelledby="report-heading">
       <h2 id="report-heading">Something happened?</h2>
       <p>Report an incident in about 5 minutes.</p>
