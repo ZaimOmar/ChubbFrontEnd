@@ -2,18 +2,18 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 12px 2px 8px;
-  border: 1px solid currentColor;
-  border-radius: 16px;
-  font: var(--mat-sys-label-large);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font: 700 10px/16px var(--font-mono);
+  text-transform: uppercase;
   white-space: nowrap;
   background: var(--badge-bg);
   color: var(--badge-fg);
 
   mat-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
   }
 }
 
@@ -36,7 +36,8 @@
 .tone-purple-hatched {
   --badge-bg: var(--app-status-purple-bg);
   --badge-fg: var(--app-status-purple-fg);
-  border-style: dashed;
+  outline: 1px dashed currentColor;
+  outline-offset: -1px;
 }
 .tone-green {
   --badge-bg: var(--app-status-green-bg);

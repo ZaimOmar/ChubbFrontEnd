@@ -1,69 +1,369 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Style reference: Assessment/Angular Material M3 Playground (see docs/design/M3-REFERENCE-MAP.md).
+// Tailwind's default scale is converted to plain CSS; no Tailwind runtime is used.
 @use '@angular/material' as mat;
 
 html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
+        primary: mat.$violet-palette,
         tertiary: mat.$blue-palette,
       ),
       typography: Roboto,
       density: 0,
     )
   );
-}
-
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
-  margin: 0;
 }
-/* You can add global styles to this file, and also import other style files */
+
+:root {
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --indigo-50: #eef2ff;
+  --indigo-100: #e0e7ff;
+  --indigo-200: #c7d2fe;
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --indigo-700: #4338ca;
+  --indigo-900: #312e81;
+  --emerald-100: #d1fae5;
+  --emerald-500: #10b981;
+  --emerald-800: #065f46;
+  --red-500: #ef4444;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: Roboto, 'Helvetica Neue', sans-serif;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  // Status tones (Tailwind 100 / 800 pairs, same shape as the reference APPROVED badge).
+  --app-status-grey-bg: #f1f5f9;
+  --app-status-grey-fg: #334155;
+  --app-status-blue-bg: #e0f2fe;
+  --app-status-blue-fg: #075985;
+  --app-status-amber-bg: #fef3c7;
+  --app-status-amber-fg: #92400e;
+  --app-status-purple-bg: #ede9fe;
+  --app-status-purple-fg: #5b21b6;
+  --app-status-green-bg: #d1fae5;
+  --app-status-green-fg: #065f46;
+  --app-status-red-bg: #fee2e2;
+  --app-status-red-fg: #991b1b;
+  --app-status-teal-bg: #ccfbf1;
+  --app-status-teal-fg: #115e59;
+  --app-status-dark-green-bg: #a7f3d0;
+  --app-status-dark-green-fg: #064e3b;
+
+  // Material system colours mapped to the reference palette.
+  --mat-sys-primary: #4f46e5;
+  --mat-sys-on-primary: #fff;
+  --mat-sys-primary-container: #e0e7ff;
+  --mat-sys-on-primary-container: #312e81;
+  --mat-sys-surface: #fff;
+  --mat-sys-on-surface: #0f172a;
+  --mat-sys-on-surface-variant: #475569;
+  --mat-sys-surface-variant: #f1f5f9;
+  --mat-sys-surface-container: #f8fafc;
+  --mat-sys-surface-container-high: #f1f5f9;
+  --mat-sys-secondary-container: #e0e7ff;
+  --mat-sys-on-secondary-container: #312e81;
+  --mat-sys-outline: #94a3b8;
+  --mat-sys-outline-variant: #cbd5e1;
+  --mat-sys-error: #dc2626;
+  --mat-sys-error-container: #fee2e2;
+  --mat-sys-on-error-container: #991b1b;
+
+  // Buttons (section 1).
+  --mat-button-filled-container-color: #4f46e5;
+  --mat-button-filled-label-text-color: #fff;
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-container-height: 32px;
+  --mat-button-filled-horizontal-padding: 16px;
+  --mat-button-filled-label-text-font: 'JetBrains Mono', monospace;
+  --mat-button-filled-label-text-size: 12px;
+  --mat-button-filled-label-text-weight: 700;
+  --mat-button-filled-label-text-tracking: 0;
+  --mat-button-outlined-container-shape: 12px;
+  --mat-button-outlined-container-height: 32px;
+  --mat-button-outlined-horizontal-padding: 16px;
+  --mat-button-outlined-outline-color: #cbd5e1;
+  --mat-button-outlined-label-text-color: #334155;
+  --mat-button-outlined-label-text-font: 'JetBrains Mono', monospace;
+  --mat-button-outlined-label-text-size: 12px;
+  --mat-button-outlined-label-text-weight: 700;
+  --mat-button-outlined-label-text-tracking: 0;
+  --mat-button-text-container-shape: 12px;
+  --mat-button-text-container-height: 32px;
+  --mat-button-text-label-text-color: #4f46e5;
+  --mat-button-text-label-text-font: 'JetBrains Mono', monospace;
+  --mat-button-text-label-text-size: 12px;
+  --mat-button-text-label-text-weight: 700;
+  --mat-button-text-label-text-tracking: 0;
+
+  // Form fields (sections 5 and 6).
+  --mat-form-field-outlined-container-shape: 12px;
+  --mat-form-field-outlined-outline-color: #cbd5e1;
+  --mat-form-field-outlined-hover-outline-color: #94a3b8;
+  --mat-form-field-outlined-focus-outline-color: #6366f1;
+  --mat-form-field-outlined-focus-outline-width: 2px;
+  --mat-form-field-container-text-font: 'JetBrains Mono', monospace;
+  --mat-form-field-container-text-size: 12px;
+  --mat-form-field-outlined-label-text-font: 'JetBrains Mono', monospace;
+  --mat-form-field-outlined-label-text-size: 12px;
+  --mat-select-trigger-text-font: 'JetBrains Mono', monospace;
+  --mat-select-trigger-text-size: 12px;
+
+  // Dialog and toast (section 21).
+  --mat-dialog-container-shape: 16px;
+  --mat-dialog-container-color: #fff;
+  --mat-dialog-container-elevation-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --mat-dialog-subhead-font: 'JetBrains Mono', monospace;
+  --mat-dialog-subhead-size: 16px;
+  --mat-dialog-subhead-weight: 700;
+  --mat-dialog-supporting-text-font: 'JetBrains Mono', monospace;
+  --mat-dialog-supporting-text-size: 12px;
+  --mat-dialog-supporting-text-color: #475569;
+  --mat-snack-bar-container-color: #0f172a;
+  --mat-snack-bar-supporting-text-color: #fff;
+  --mat-snack-bar-container-shape: 12px;
+  --mat-snack-bar-supporting-text-font: 'JetBrains Mono', monospace;
+  --mat-snack-bar-supporting-text-size: 12px;
+  --mat-snack-bar-button-color: #818cf8;
+
+  // Table pagination (section 10 footer) and progress (section 19).
+  --mat-paginator-container-background-color: transparent;
+  --mat-paginator-container-text-font: 'JetBrains Mono', monospace;
+  --mat-paginator-container-text-size: 12px;
+  --mat-paginator-container-text-color: #475569;
+  --mat-paginator-select-trigger-text-size: 12px;
+  --mat-progress-bar-active-indicator-color: #4f46e5;
+  --mat-progress-bar-track-color: #f1f5f9;
+  --mat-progress-bar-track-height: 8px;
+  --mat-progress-bar-active-indicator-height: 8px;
+  --mat-progress-bar-track-shape: 9999px;
+  --mat-card-elevated-container-color: #fff;
+  --mat-card-elevated-container-shape: 16px;
+  --mat-card-outlined-container-shape: 16px;
+  --mat-radio-label-text-font: 'JetBrains Mono', monospace;
+  --mat-radio-label-text-size: 12px;
+  --mat-option-label-text-font: 'JetBrains Mono', monospace;
+  --mat-option-label-text-size: 12px;
+  --mat-checkbox-label-text-font: 'JetBrains Mono', monospace;
+  --mat-checkbox-label-text-size: 12px;
+  --mat-card-outlined-outline-color: #e2e8f0;
+  --mat-card-outlined-container-color: #fff;
+}
 
 html,
 body {
   height: 100%;
 }
+
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--slate-900);
+  background-color: var(--slate-50);
 }
 
-// Status and visibility colour tokens (00 section 2). Each pair meets 4.5:1 contrast; meaning is also
-// carried by an icon and a text label, never by colour alone.
-:root {
-  --app-status-grey-bg: #e3e3e3;
-  --app-status-grey-fg: #1f1f1f;
-  --app-status-blue-bg: #d3e3fd;
-  --app-status-blue-fg: #0b3d91;
-  --app-status-amber-bg: #ffe8a3;
-  --app-status-amber-fg: #5c4300;
-  --app-status-purple-bg: #e9ddff;
-  --app-status-purple-fg: #3f1d8a;
-  --app-status-green-bg: #c8f0d0;
-  --app-status-green-fg: #0d4a1f;
-  --app-status-red-bg: #ffd9d6;
-  --app-status-red-fg: #7a0b0b;
-  --app-status-teal-bg: #c4f0ee;
-  --app-status-teal-fg: #05504c;
-  --app-status-dark-green-bg: #a8e0b5;
-  --app-status-dark-green-fg: #063d1a;
+h1 {
+  margin: 0 0 var(--s-4, 16px);
+  font: 700 18px/28px var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--slate-900);
+}
+h2 {
+  margin: 0;
+  font: 700 16px/24px var(--font-mono);
+  text-transform: uppercase;
+  color: var(--slate-900);
+}
+h3 {
+  font: 700 14px/20px var(--font-sans);
+  color: var(--slate-900);
+}
+
+p {
+  margin: 0 0 8px;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--slate-600);
+}
+
+a {
+  color: var(--indigo-600);
+}
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--indigo-500);
+  outline-offset: 2px;
+}
+
+.mat-icon,
+.material-icons {
+  font-family: 'Material Icons Outlined', 'Material Icons';
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+.muted {
+  color: var(--slate-500);
+}
+.caption {
+  margin: 0;
+  font: 400 12px/16px var(--font-mono);
+  color: var(--slate-500);
+}
+.eyebrow {
+  font: 700 10px/16px var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+}
+
+// Section card (every section wrapper in the reference).
+.card {
+  box-sizing: border-box;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+// Banners and inline alerts.
+.banner {
+  margin: 12px 0;
+  padding: 12px 16px;
+  font: 400 12px/16px var(--font-mono);
+  color: var(--slate-800);
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+}
+
+.grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  margin-bottom: 32px;
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// Master-detail split pane (section 17).
+.split-pane {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-bottom: 32px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  font: 400 12px/16px var(--font-mono);
+  @media (min-width: 768px) {
+    grid-template-columns: 3fr 2fr;
+  }
+  .pane-main {
+    padding: 16px;
+    background: #fff;
+  }
+  .pane-side {
+    padding: 12px;
+    background: var(--slate-50);
+    border-top: 1px solid var(--slate-200);
+    @media (min-width: 768px) {
+      border-top: 0;
+      border-left: 1px solid var(--slate-200);
+    }
+  }
+}
+.pane-title {
+  margin: 0 0 12px;
+  font: 700 14px/20px var(--font-sans);
+  color: var(--slate-900);
+}
+
+// Decision tones.
+.decision-approved {
+  background: var(--emerald-100);
+  color: var(--emerald-800);
+}
+.decision-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.decision-info {
+  background: var(--indigo-50);
+  color: var(--indigo-900);
+}
+
+// Filled button elevation (section 1: `shadow`).
+.mat-mdc-unelevated-button:not([disabled]) {
+  box-shadow: var(--shadow);
+}
+.mat-mdc-unelevated-button:not([disabled]):hover {
+  --mat-button-filled-container-color: #4338ca;
+}
+
+// Snackbar toast (section 21): bg slate-900, border slate-700, leading info icon.
+.mat-mdc-snack-bar-container.toast .mdc-snackbar__surface {
+  border: 1px solid var(--slate-700);
+  box-shadow: var(--shadow-2xl);
+}
+.mat-mdc-snack-bar-container.toast .mdc-snackbar__label::before {
+  content: 'info';
+  margin-right: 12px;
+  font-family: 'Material Icons Outlined', 'Material Icons';
+  font-size: 18px;
+  vertical-align: middle;
+  color: var(--indigo-400);
+}
+
+.mat-mdc-form-field-hint,
+.mat-mdc-form-field-error {
+  font: 400 10px/16px var(--font-mono);
+}
+.mat-mdc-form-field-hint {
+  color: var(--slate-400);
 }
 
 .cdk-visually-hidden-text {
@@ -73,4 +373,297 @@ body {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.4) 25%,
+    rgba(203, 213, 225, 0.8) 50%,
+    rgba(226, 232, 240, 0.4) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.spin-slow {
+  animation: spin-slow 1.5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-bg,
+  .spin-slow {
+    animation: none;
+  }
+}
+
+// Custom scrollbar (reference).
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 3px;
+}
+
+section.card > h2 {
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--slate-100);
+}
+form.card h2 {
+  margin: 8px 0;
+}
+mat-card.mat-mdc-card {
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+// Form field (reference section 5): label above, rounded outlined box, hint and counter below.
+.app-field {
+  margin-bottom: 16px;
+}
+.field-label {
+  display: block;
+  margin-bottom: 4px;
+  font: 400 11px/16px var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+}
+.field-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid var(--slate-300);
+  border-radius: 12px;
+  font: 400 12px/16px var(--font-mono);
+  color: var(--slate-900);
+}
+.field-box:focus-within {
+  border-color: var(--indigo-500);
+  box-shadow: 0 0 0 2px var(--indigo-500);
+}
+.has-error .field-box {
+  border-color: var(--red-500);
+  box-shadow: none;
+}
+.field-prefix {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: var(--slate-400);
+  pointer-events: none;
+}
+.field-prefix + .field-control {
+  padding-left: 40px;
+}
+.field-control {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+}
+textarea.field-control {
+  resize: vertical;
+  min-height: 72px;
+}
+select.field-control {
+  cursor: pointer;
+}
+.field-box .field-suffix {
+  margin: 0 4px;
+  padding: 4px;
+  color: var(--slate-400);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.field-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+  font: 400 10px/16px var(--font-mono);
+  color: var(--slate-400);
+}
+.has-error .field-foot {
+  color: #dc2626;
+}
+
+// Form card parts: section dividers and a right-aligned footer (reference card footer).
+.form-section {
+  margin: 24px 0 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--slate-100);
+}
+.form-section.first {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.card-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--slate-100);
+}
+.mat-mdc-dialog-actions {
+  border-top: 1px solid var(--slate-100);
+}
+fieldset {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+fieldset .mat-mdc-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+// Notification popover (white card, reference border, radius and shadow).
+.notification-panel.mat-mdc-menu-panel {
+  min-width: 320px;
+  max-width: 380px;
+  max-height: 420px;
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  box-shadow: var(--shadow-2xl);
+}
+.notification-panel .panel-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--slate-100);
+}
+.notification-panel .panel-head h2 {
+  font-size: 14px;
+}
+.notification-panel .skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+.notification-panel .bar {
+  height: 12px;
+  border-radius: 4px;
+}
+.notification-panel .w33 {
+  width: 33%;
+}
+.notification-panel .w66 {
+  width: 66%;
+}
+.notification-panel .empty {
+  margin: 0;
+  padding: 24px 16px;
+  text-align: center;
+  font: 400 12px/16px var(--font-mono);
+  color: var(--slate-500);
+}
+.notification-panel .mat-mdc-menu-item.item {
+  display: block;
+  height: auto;
+  min-height: 0;
+  padding: 10px 16px;
+  .mat-mdc-menu-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+.notification-panel .msg {
+  font: 400 12px/16px var(--font-sans);
+  color: var(--slate-600);
+  white-space: normal;
+}
+.notification-panel .msg.unread {
+  font-weight: 700;
+  color: var(--slate-800);
+}
+.notification-panel .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: var(--indigo-600);
+  border-radius: 9999px;
+}
+.notification-panel .when {
+  font: 400 11px/16px var(--font-sans);
+  color: var(--slate-400);
+}
+
+// Claim detail layout: decision card and timeline on the left, sticky summary on the right.
+.detail-layout {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  grid-template-areas: 'decision' 'summary' 'timeline';
+  align-items: start;
+  .decision {
+    grid-area: decision;
+  }
+  .summary {
+    grid-area: summary;
+  }
+  .timeline {
+    grid-area: timeline;
+  }
+  .card {
+    margin-bottom: 0;
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas: 'decision summary' 'timeline summary';
+    .summary {
+      position: sticky;
+      top: 89px;
+    }
+  }
+}
+.card-foot-slot:has(.card-foot) {
+  display: block;
+}
+app-decision-card .card-foot {
+  margin-top: 16px;
+}
+.header-card {
+  margin-bottom: 24px;
 }

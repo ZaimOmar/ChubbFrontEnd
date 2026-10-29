@@ -1,11 +1,23 @@
 import { Routes } from '@angular/router';
-import { AreaPlaceholderComponent } from '../../shared/area-placeholder/area-placeholder.component';
 
 export const MANAGER_ROUTES: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
   {
-    path: '**',
-    component: AreaPlaceholderComponent,
-    title: 'Manager area - Chubb Claims',
-    data: { title: 'Manager area' },
+    path: 'home',
+    title: 'Overview - Chubb Claims',
+    loadComponent: () => import('./home/manager-home.page').then((m) => m.ManagerHomePage),
   },
+  {
+    path: 'pending',
+    title: 'Pending approvals - Chubb Claims',
+    loadComponent: () =>
+      import('./pending/pending-approvals.page').then((m) => m.PendingApprovalsPage),
+  },
+  {
+    path: 'claims/:id',
+    title: 'Claim - Chubb Claims',
+    loadComponent: () =>
+      import('./claim-detail/manager-claim-detail.page').then((m) => m.ManagerClaimDetailPage),
+  },
+  { path: '**', redirectTo: 'home' },
 ];

@@ -22,10 +22,15 @@ let nextTimelineId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './claim-timeline.component.scss',
   template: `
-    <section [attr.aria-labelledby]="headingId" [attr.aria-busy]="loading()">
-      <h2 [id]="headingId">Claim timeline</h2>
+    <section class="card" [attr.aria-labelledby]="headingId" [attr.aria-busy]="loading()">
+      <div class="card-head">
+        <div>
+          <h2 [id]="headingId">Claim timeline</h2>
+          <p class="caption">Every step on this claim, oldest first.</p>
+        </div>
+      </div>
       @if (loading()) {
-        <app-loading-bar />
+        <app-loading-bar variant="table" />
       } @else if (error(); as problem) {
         <app-error-panel
           [message]="problem.message"
@@ -35,7 +40,9 @@ let nextTimelineId = 0;
       } @else if (visibleEntries().length === 0) {
         <app-empty-state message="No activity yet." icon="history" />
       } @else {
-        <button type="button" class="jump" (click)="jumpToLatest()">Jump to latest</button>
+        @if (visibleEntries().length > 8) {
+          <button type="button" class="jump" (click)="jumpToLatest()">Jump to latest</button>
+        }
         <ol #list class="timeline">
           @for (entry of visibleEntries(); track entry.id) {
             <li tabindex="-1">

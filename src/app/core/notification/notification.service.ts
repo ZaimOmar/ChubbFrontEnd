@@ -7,6 +7,10 @@ export class NotificationService {
   private readonly snackBar = inject(MatSnackBar);
 
   show(message: string): void {
-    this.snackBar.open(message, undefined, { duration: 5000, politeness: 'polite' });
+    this.snackBar.open(message, undefined, {
+      duration: 5000,
+      politeness: 'polite',
+      panelClass: 'toast',
+    });
   }
 }

@@ -3,6 +3,8 @@ import { Role } from '../auth/roles';
 export interface NavItem {
   readonly label: string;
   readonly url: string;
+  /** Material Icons Outlined glyph shown in the rail. */
+  readonly icon: string;
 }
 
 export interface NavGroup {
@@ -14,29 +16,29 @@ export interface NavGroup {
 const CLAIMANT: NavGroup = {
   heading: 'Claimant',
   items: [
-    { label: 'Report incident', url: '/claimant/report' },
-    { label: 'My claims', url: '/claimant/claims' },
+    { label: 'Home', url: '/claimant/home', icon: 'dashboard' },
+    { label: 'Report incident', url: '/claimant/report', icon: 'edit_note' },
+    { label: 'My claims', url: '/claimant/claims', icon: 'list_alt' },
   ],
 };
 
 const OFFICER: NavGroup = {
   heading: 'Officer',
   items: [
-    { label: 'Incoming queue', url: '/staff/queue' },
-    { label: 'My workload', url: '/staff/workload' },
+    { label: 'Home', url: '/staff/home', icon: 'dashboard' },
+    { label: 'Incoming queue', url: '/staff/queue', icon: 'inbox' },
   ],
 };
 
 const MANAGER: NavGroup = {
   heading: 'Manager',
   items: [
-    { label: 'Pending approvals', url: '/manager/pending' },
-    { label: 'Outstanding', url: '/manager/outstanding' },
-    { label: 'Exposure', url: '/manager/exposure' },
+    { label: 'Home', url: '/manager/home', icon: 'dashboard' },
+    { label: 'Pending approvals', url: '/manager/pending', icon: 'task_alt' },
   ],
 };
 
-/** Mirrors 00 section 1. Navigation is UX only; the backend enforces access. */
+/** Mirrors 00 v2 section 1; items whose screens are not built yet are hidden.  Navigation is UX only; the backend enforces access. */
 export function navGroupsFor(roles: readonly Role[]): readonly NavGroup[] {
   const groups: NavGroup[] = [];
   if (roles.includes('Claimant')) groups.push(CLAIMANT);

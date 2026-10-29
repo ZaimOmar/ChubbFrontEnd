@@ -14,11 +14,10 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DemoAccount } from '../../core/config/app-config';
+import { FieldComponent } from '../../shared/form/field.component';
 import { DemoAccountPickerComponent } from './demo-account-picker.component';
 
 /** Server-side validation messages for the two fields (400 validation-error). */
@@ -37,9 +36,8 @@ export interface LoginSubmission {
   imports: [
     ReactiveFormsModule,
     MatButtonModule,
-    MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
+    FieldComponent,
     MatProgressSpinnerModule,
     DemoAccountPickerComponent,
   ],
