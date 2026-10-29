@@ -7,8 +7,8 @@ export function isRole(value: unknown): value is Role {
 
 /** Area root for a role set. Officer wins for the dual-role user (BR-32). UX routing only. */
 export function landingUrlFor(roles: readonly Role[]): string {
-  if (roles.includes('Officer')) return '/staff';
-  if (roles.includes('Manager')) return '/manager';
-  if (roles.includes('Claimant')) return '/claimant';
+  if (roles.includes('Officer')) return '/staff/home';
+  if (roles.includes('Manager')) return '/manager/home';
+  if (roles.includes('Claimant')) return '/claimant/home';
   return '/login';
 }

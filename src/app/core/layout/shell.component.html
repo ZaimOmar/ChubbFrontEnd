@@ -1,56 +1,81 @@
 <a class="skip-link" href="#main-content" (click)="skipToMain($event, main)"
   >Skip to main content</a
 >
-<header>
-  <mat-toolbar>
-    @if (isNarrow()) {
-      <button
-        mat-icon-button
-        type="button"
-        aria-label="Open navigation menu"
-        [attr.aria-expanded]="drawer.opened"
-        (click)="drawer.toggle()"
-      >
-        <mat-icon aria-hidden="true">menu</mat-icon>
-      </button>
-    }
-    <span class="brand">Chubb Claims</span>
-    @if (areaLabel()) {
-      <span class="area">Area: {{ areaLabel() }}</span>
-    }
-    <span class="spacer"></span>
-    @if (userName()) {
-      <span class="user">{{ userName() }} ({{ roleText() }})</span>
-    }
-    <button mat-button type="button" (click)="logout.emit()">Logout</button>
-  </mat-toolbar>
-</header>
-<mat-sidenav-container class="container">
-  <mat-sidenav #drawer [mode]="isNarrow() ? 'over' : 'side'" [opened]="!isNarrow()">
-    <nav aria-label="Main">
-      @for (group of groups(); track group.heading) {
-        @if (showHeadings()) {
-          <h2 class="group-heading">{{ group.heading }}</h2>
+<header class="topbar">
+  <div class="left">
+    <a class="brand" [routerLink]="homeUrl()">
+      <span class="logo" aria-hidden="true"><mat-icon>verified_user</mat-icon></span>
+      <span class="titles">
+        <span class="title">Chubb Claims</span>
+        @if (crumbs().length > 0) {
+          <nav class="crumbs" aria-label="Breadcrumb" (click)="$event.stopPropagation()">
+            <ol>
+              @for (crumb of crumbs(); track $index; let last = $last) {
+                <li>
+                  @if (crumb.url && !last) {
+                    <a [routerLink]="crumb.url">{{ crumb.label }}</a>
+                    <mat-icon aria-hidden="true">chevron_right</mat-icon>
+                  } @else {
+                    <span [attr.aria-current]="last ? 'page' : null">{{ crumb.label }}</span>
+                  }
+                </li>
+              }
+            </ol>
+          </nav>
         }
-        <ul>
-          @for (item of group.items; track item.url) {
-            <li>
-              <a
-                [routerLink]="item.url"
-                routerLinkActive="active"
-                ariaCurrentWhenActive="page"
-                (click)="closeIfNarrow(drawer)"
-                >{{ item.label }}</a
-              >
-            </li>
-          }
-        </ul>
+      </span>
+    </a>
+  </div>
+  @defer (on idle) {
+    <app-notification-bell />
+  }
+</header>
+<div class="body">
+  <nav class="rail" aria-label="Main">
+    @for (group of groups(); track group.heading; let last = $last) {
+      @for (item of group.items; track item.url) {
+        <a
+          class="rail-item"
+          [routerLink]="item.url"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          [attr.aria-label]="labelFor(group, item.label)"
+          [matTooltip]="labelFor(group, item.label)"
+          matTooltipPosition="right"
+        >
+          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+        </a>
       }
-    </nav>
-  </mat-sidenav>
-  <mat-sidenav-content>
-    <main id="main-content" #main tabindex="-1">
-      <ng-content />
-    </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+      @if (!last) {
+        <span class="rail-divider" aria-hidden="true"></span>
+      }
+    }
+    <div class="rail-user">
+      @if (userName()) {
+        <span
+          class="avatar"
+          role="img"
+          tabindex="0"
+          [attr.aria-label]="userName() + ', ' + roleText()"
+          [matTooltip]="userName() + ', ' + roleText()"
+          matTooltipPosition="right"
+          >{{ initials() }}</span
+        >
+      }
+      <button
+        type="button"
+        class="rail-item"
+        aria-label="Log out"
+        matTooltip="Log out"
+        matTooltipPosition="right"
+        (click)="logout.emit()"
+      >
+        <mat-icon aria-hidden="true">logout</mat-icon>
+      </button>
+    </div>
+  </nav>
+  <main id="main-content" #main tabindex="-1">
+    <ng-content />
+  </main>
+</div>
+<footer class="footer">zaimomar@copyright 2026</footer>

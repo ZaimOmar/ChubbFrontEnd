@@ -2,21 +2,26 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-radius: var(--mat-sys-corner-small);
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  padding: 16px;
+  margin-bottom: 24px;
+  font: 400 12px/16px var(--font-mono);
+  color: #991b1b;
+  background: #fff;
+  border: 1px solid #fecaca;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
 }
-
+mat-icon {
+  color: var(--red-500);
+}
 .body {
   flex: 1;
 }
-
 .message,
 .reference {
   margin: 0;
 }
-
 .reference {
-  font: var(--mat-sys-body-small);
+  font-size: 10px;
+  color: var(--slate-400);
 }

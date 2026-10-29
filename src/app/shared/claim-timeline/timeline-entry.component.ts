@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DateTimePipe } from '../pipes/date-time.pipe';
@@ -11,12 +12,19 @@ interface VisibilityBadge {
 
 @Component({
   selector: 'app-timeline-entry',
-  imports: [MatIconModule, DateTimePipe],
+  imports: [MatIconModule, DateTimePipe, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './timeline-entry.component.scss',
   template: `
+    <span class="node" [class]="nodeClass()" aria-hidden="true">
+      <mat-icon [fontIcon]="nodeIcon()" />
+    </span>
     <div class="entry">
-      <time [attr.datetime]="entry().occurredAt" [title]="entry().occurredAt">
+      <span class="summary">{{ entry().summary }}</span>
+      <time
+        [attr.datetime]="entry().occurredAt"
+        [title]="entry().occurredAt | date: 'd MMM yyyy, HH:mm:ss z'"
+      >
         {{ entry().occurredAt | dateTime }}
       </time>
       @if (badge(); as b) {
@@ -24,7 +32,6 @@ interface VisibilityBadge {
           <mat-icon aria-hidden="true" [fontIcon]="b.icon" />{{ b.label }}
         </span>
       }
-      <span class="summary">{{ entry().summary }}</span>
       <span class="actor">{{ actorText() }}</span>
       @if (isStaff()) {
         @if (entry().makerName || entry().checkerName) {
@@ -54,6 +61,19 @@ export class TimelineEntryComponent {
   readonly entry = input.required<TimelineEntry>();
   readonly audience = input.required<TimelineAudience>();
 
+  protected readonly nodeClass = computed(() => {
+    const { kind, visibility } = this.entry();
+    if (kind === 'Refused') return 'node node-refused';
+    if (kind === 'Correction') return 'node node-correction';
+    return visibility === 'Internal' ? 'node node-internal' : 'node';
+  });
+  protected readonly nodeIcon = computed(() => {
+    const { kind, visibility } = this.entry();
+    if (kind === 'Refused') return 'warning';
+    if (kind === 'Correction') return 'edit_note';
+    return visibility === 'Internal' ? 'lock' : 'check';
+  });
+
   protected readonly isStaff = computed(() => this.audience() === 'staff');
 
   /** Badges are staff-only (US-09, BR-09). */
@@ -71,6 +91,7 @@ export class TimelineEntryComponent {
   /** Claimants see the role only, never a name. */
   protected readonly actorText = computed(() => {
     const { actorName, actorRole } = this.entry();
+    if (!actorRole) return '';
     return this.isStaff() && actorName ? `by ${actorName} (${actorRole})` : `by ${actorRole}`;
   });
 }

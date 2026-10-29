@@ -10,7 +10,8 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:bundle": "node scripts/check-bundle.mjs"
+    "check:bundle": "node scripts/check-bundle.mjs",
+    "api:generate": "openapi-generator-cli generate -i openapi-gateway-v1.json -g typescript-angular -o src/app/api --additional-properties=serviceSuffix=Api,ngVersion=20.0.0,providedIn=root --skip-validate-spec"
   },
   "prettier": {
     "printWidth": 100,
@@ -41,6 +42,7 @@
     "@angular/build": "^20.3.41",
     "@angular/cli": "^20.3.41",
     "@angular/compiler-cli": "^20.3.0",
+    "@openapitools/openapi-generator-cli": "^2.42.0",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "20.7.0",
     "eslint": "^9.39.1",

@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,20 +8,21 @@ import {
   output,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { map } from 'rxjs';
+import { NotificationBellComponent } from './notification-bell.component';
+import { Crumb } from './breadcrumbs';
 import { NavGroup } from './nav-items';
 
 @Component({
   selector: 'app-shell',
   imports: [
     MatToolbarModule,
-    MatSidenavModule,
+    MatTooltipModule,
+    NotificationBellComponent,
     MatButtonModule,
     MatIconModule,
     RouterLink,
@@ -35,27 +35,30 @@ import { NavGroup } from './nav-items';
 export class ShellComponent {
   readonly userName = input.required<string>();
   readonly roleText = input.required<string>();
-  /** Role area derived from the URL prefix (mockup 00 section 1); empty outside an area. */
-  readonly areaLabel = input('');
+  readonly crumbs = input<readonly Crumb[]>([]);
   readonly groups = input.required<readonly NavGroup[]>();
+  readonly homeUrl = input('/');
   readonly logout = output<void>();
 
   private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
-  private readonly breakpoints = inject(BreakpointObserver);
-  protected readonly isNarrow = toSignal(
-    this.breakpoints.observe('(max-width: 959.98px)').pipe(map((state) => state.matches)),
-    { initialValue: false },
+  protected readonly initials = computed(() =>
+    this.userName()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0].toUpperCase())
+      .join(''),
   );
-  protected readonly showHeadings = computed(() => this.groups().length > 1);
+  protected readonly isMultiGroup = computed(() => this.groups().length > 1);
+
+  protected labelFor(group: NavGroup, label: string): string {
+    return this.isMultiGroup() ? `${group.heading}: ${label}` : label;
+  }
 
   /** Moves focus to the page heading (or main) after navigation so keyboard and screen reader users land on the new content. */
   focusContent(): void {
     const main = this.main().nativeElement;
     (main.querySelector<HTMLElement>('h1') ?? main).focus();
-  }
-
-  protected closeIfNarrow(drawer: MatSidenav): void {
-    if (this.isNarrow()) void drawer.close();
   }
 
   protected skipToMain(event: Event, main: HTMLElement): void {

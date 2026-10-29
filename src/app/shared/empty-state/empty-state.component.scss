@@ -3,10 +3,28 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 24px;
-  color: var(--mat-sys-on-surface-variant);
+  padding: 32px;
+  margin-bottom: 24px;
+  text-align: center;
+  font: 400 12px/16px var(--font-mono);
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
 }
-
+mat-icon {
+  width: 36px;
+  height: 36px;
+  font-size: 36px;
+  color: var(--slate-400);
+}
 p {
   margin: 0;
+}
+.title {
+  font-weight: 700;
+  color: var(--slate-800);
+}
+.hint {
+  font-size: 10px;
+  color: var(--slate-400);
 }

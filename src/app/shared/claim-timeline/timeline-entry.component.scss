@@ -1,50 +1,84 @@
+:host {
+  display: block;
+}
 .entry {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 12px;
+  flex-direction: column;
+  gap: 2px;
+  font: 400 12px/16px var(--font-mono);
 }
 
-time {
-  font: var(--mat-sys-label-large);
+.node {
+  position: absolute;
+  left: -12px;
+  top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  color: #fff;
+  background: var(--emerald-500);
+  box-shadow: var(--shadow);
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+.node-internal {
+  background: var(--slate-500);
+}
+.node-refused {
+  background: var(--red-500);
+}
+.node-correction {
+  background: #f59e0b;
 }
 
 .summary {
-  font: var(--mat-sys-body-large);
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+time {
+  font-size: 10px;
+  color: var(--slate-400);
 }
 
 .actor,
 .detail {
-  flex-basis: 100%;
-  font: var(--mat-sys-body-medium);
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--slate-500);
 }
 
 .badge {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 0 8px 0 4px;
-  border: 1px solid currentColor;
-  border-radius: 12px;
-  font: var(--mat-sys-label-medium);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font: 700 10px/16px var(--font-mono);
+  text-transform: uppercase;
   background: var(--badge-bg);
   color: var(--badge-fg);
 
   mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
   }
 }
 
 .tone-public {
-  --badge-bg: var(--app-status-grey-bg);
-  --badge-fg: var(--app-status-grey-fg);
+  --badge-bg: var(--app-status-green-bg);
+  --badge-fg: var(--app-status-green-fg);
 }
 .tone-internal {
-  --badge-bg: var(--app-status-blue-bg);
-  --badge-fg: var(--app-status-blue-fg);
+  --badge-bg: var(--app-status-grey-bg);
+  --badge-fg: var(--app-status-grey-fg);
 }
 .tone-refused {
   --badge-bg: var(--app-status-red-bg);

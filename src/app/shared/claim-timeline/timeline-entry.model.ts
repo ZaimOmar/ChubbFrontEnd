@@ -16,7 +16,7 @@ export interface TimelineEntry {
   readonly visibility: TimelineVisibility;
   readonly kind: TimelineEntryKind;
   readonly actorName?: string;
-  readonly actorRole: Role;
+  readonly actorRole?: Role | 'System';
   readonly reason?: string;
   readonly makerName?: string;
   readonly checkerName?: string;

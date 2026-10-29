@@ -22,6 +22,10 @@ Gate rule: `frontend-developer` may build a screen only when its row says APPROV
 | 15 | Officer: withdraw pending proposal | 15-officer-withdraw-proposal.md | SHOULD | US-31 | v1 | APPROVED | 2026-10-28 | None; designer assumptions on open questions accepted |
 | 16 | Release / reassign (officer, manager) | 16-reassign-release.md | SHOULD | US-12 | v1 | APPROVED | 2026-10-28 | None; designer assumptions on open questions accepted |
 | 17 | Officer: my workload | 17-officer-workload.md | SHOULD | US-10 | v1 | APPROVED | 2026-10-28 | None; designer assumptions on open questions accepted |
+| 00 | Shared patterns v2: shell, tokens, typography, a11y (adds to 00 v1; v1 stays APPROVED) | 00-shared-patterns-v2-shell-and-visual-system.md | UX improvement | US-03, 05, 09, 23 | v2 | APPROVED | 2026-10-29 | Human approval 2026-10-29; open-question decisions: hide unbuilt nav items, plain "Welcome back", no overdue threshold, keep navy #0B2A5B |
+| 18 | Role-aware Home (claimant, officer, manager) | 18-role-home-landing.md | UX improvement | US-02, 06, 10, 13, 14, 30 | v1 | APPROVED | 2026-10-29 | Human approval 2026-10-29; open-question decisions: hide unbuilt nav items, plain "Welcome back", no overdue threshold, keep navy #0B2A5B |
+| 19 | Clickable claims list / table (refines 04 table; reused by 08, Home) | 19-clickable-claims-list.md | UX improvement | US-06, 30 | v1 | APPROVED | 2026-10-29 | Human approval 2026-10-29; open-question decisions: hide unbuilt nav items, plain "Welcome back", no overdue threshold, keep navy #0B2A5B |
+| 20 | Claim detail layout with timeline and decision card (v2 layout of 03/05/09) | 20-claim-detail-timeline-decision-v2.md | UX improvement | US-03, 05, 09 | v2 | APPROVED | 2026-10-29 | Human approval 2026-10-29; open-question decisions: hide unbuilt nav items, plain "Welcome back", no overdue threshold, keep navy #0B2A5B |
 
 Not designed (Phase 2 optional mockups, COULD): payee details, money view, settlement, payment exceptions, fund, ledger, reconciliation. COULD P1 items (notifications, document upload, team table, charts, SSE) not designed.
 

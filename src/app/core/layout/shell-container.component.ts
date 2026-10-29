@@ -11,7 +11,8 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
-import { areaLabelFor, navGroupsFor } from './nav-items';
+import { BreadcrumbService, crumbsFor } from './breadcrumbs';
+import { navGroupsFor } from './nav-items';
 import { ShellComponent } from './shell.component';
 
 /** Wires the presentational shell to the session and the router. */
@@ -23,8 +24,9 @@ import { ShellComponent } from './shell.component';
     <app-shell
       [userName]="userName()"
       [roleText]="roleText()"
-      [areaLabel]="areaLabel()"
+      [crumbs]="crumbs()"
       [groups]="groups()"
+      [homeUrl]="auth.landingUrl()"
       (logout)="logout()"
     >
       <router-outlet />
@@ -32,7 +34,7 @@ import { ShellComponent } from './shell.component';
   `,
 })
 export class ShellContainerComponent {
-  private readonly auth = inject(AuthService);
+  protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly shell = viewChild.required(ShellComponent);
@@ -48,7 +50,8 @@ export class ShellContainerComponent {
   protected readonly userName = computed(() => this.auth.user()?.name ?? '');
   protected readonly roleText = computed(() => this.auth.roles().join(' + '));
   protected readonly groups = computed(() => navGroupsFor(this.auth.roles()));
-  protected readonly areaLabel = computed(() => areaLabelFor(this.url()));
+  private readonly breadcrumbs = inject(BreadcrumbService);
+  protected readonly crumbs = computed(() => crumbsFor(this.url(), this.breadcrumbs.leaf()));
 
   constructor() {
     this.router.events
